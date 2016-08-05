@@ -13,10 +13,9 @@
 set -o errexit
 set -o nounset
 
-usage="$0 ubuntu:14.04"
 if [ -z $1 ]; then
-    echo $usage;
-    exit 0;
+    echo "no Docker image specified!";
+    exit 1;
 else
     image=$1
 fi
