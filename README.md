@@ -4,7 +4,7 @@ Are you developing Docker images and you would like to run them on an HPC cluste
 
 ## Requirements
 
- - Docker (native Linux or Docker for Mac of Docker for Windows).
+ - Docker (native Linux or Docker for Mac or Docker for Windows).
 
 ## Usage
 
