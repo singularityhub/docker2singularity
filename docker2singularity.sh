@@ -75,7 +75,7 @@ TMPDIR=$(mktemp -u -d)
 mkdir -p $TMPDIR
 
 creation_date=`echo ${creation_date} | cut -c1-10`
-new_container_name=$image_name-$creation_date-$container_id.img
+new_container_name=/output/$image_name-$creation_date-$container_id.img
 singularity create -s $size $new_container_name
 docker export $container_id | singularity import $new_container_name
 docker inspect $container_id >> $TMPDIR/singularity.json
@@ -145,5 +145,3 @@ singularity exec --writable --contain $new_container_name /bin/sh -c "find / -ex
 
 echo "Stopping container, please wait."
 docker stop $container_id
-
-mv $new_container_name /output/$new_container_name
