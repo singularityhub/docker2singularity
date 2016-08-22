@@ -46,6 +46,7 @@ image_name=`docker inspect --format="{{.Config.Image}}" $container_id`
 # using bash substitution
 # removing special chars [perhaps echo + sed would be better for other chars]
 image_name=${image_name/\//_}
+image_name=${image_name/:/_}
 
 # following is the date of the container, not the docker image.
 #creation_date=`docker inspect --format="{{.Created}}" $container_id`
@@ -106,7 +107,7 @@ if [[ $ENTRYPOINT != [* ]]; then
 fi
 
 # Remove quotes, commas, and braces
-ENTRYPOINT=`echo "${ENTRYPOINT//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,//g'`
+ENTRYPOINT=`echo "${ENTRYPOINT//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,/ /g'`
 
 echo '#!/bin/sh' > $TMPDIR/singularity
 if [[ $ENTRYPOINT != "null" ]]; then
@@ -142,6 +143,8 @@ echo "Fixing permissions."
 singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
 singularity exec --writable --contain $new_container_name /bin/sh -c "find / -executable -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
 
+echo "Adding mount points"
+singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p mkdir /oasis /projects /scratch /local-scratch"
 
 echo "Stopping container, please wait."
 docker stop $container_id
