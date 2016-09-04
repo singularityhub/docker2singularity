@@ -9,11 +9,12 @@ Are you developing Docker images and you would like to run them on an HPC cluste
 ## Usage
 
 No need to download anything from this repository! Simply type:
+
      docker run \        
-     -v /var/run/docker.sock:/var/run/docker.sock          
-     -v D:\host\path\where\to\ouptut\singularity\image:/output          
-     --privileged -t --rm           
-     filo/docker2singularity            
+     -v /var/run/docker.sock:/var/run/docker.sock \
+     -v D:\host\path\where\to\ouptut\singularity\image:/output \
+     --privileged -t --rm \
+     filo/docker2singularity \            
      ubuntu:14.04
 
 Replace `D:\host\path\where\to\ouptut\singularity\image` with a path in the host filesystem where your Singularity image will be created. Replace `ubuntu:14.04` with the docker image name you wish to convert (it will be pulled from Docker Hub if it does not exist on your host system).
@@ -38,12 +39,12 @@ If you are getting the following error:
 
 You need to use `docker info` command to check your docker version and use it to grab the correct corresponding version of docker2singularity. For example:
 
-docker run \
-  -v /var/run/docker.sock:/var/run/docker.s  k \
-  -v D:\host\path\where\to\ouptut\singularity\image:/out  t \
-  --privileged -t --rm    \
-  filo/docker2singularity:1.11 \
-  ubuntu:14.04
+     docker run \        
+     -v /var/run/docker.sock:/var/run/docker.sock \
+     -v D:\host\path\where\to\ouptut\singularity\image:/output \
+     --privileged -t --rm \
+     filo/docker2singularity:1.11 \            
+     ubuntu:14.04
 
 Currently only 1.11 and 1.12 versions are supported. If you are using older version of Docker you will need to upgrade.
 
