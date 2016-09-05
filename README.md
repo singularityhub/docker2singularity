@@ -4,7 +4,8 @@ Are you developing Docker images and you would like to run them on an HPC cluste
 
 ## Requirements
 
- - Docker (native Linux or Docker for Mac or Docker for Windows).
+ - Docker (native Linux or Docker for Mac or Docker for Windows) - to create the Singularity image.
+ - Singularity >= 2.1 - to run the Singularity image (**versions 2.0 and older are not supported!**).
 
 ## Usage
 
