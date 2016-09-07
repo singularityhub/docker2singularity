@@ -76,20 +76,23 @@ TMPDIR=$(mktemp -u -d)
 mkdir -p $TMPDIR
 
 creation_date=`echo ${creation_date} | cut -c1-10`
-new_container_name=/output/$image_name-$creation_date-$container_id.img
+new_container_name=/tmp/$image_name-$creation_date-$container_id.img
+echo "(1/9) Creating an empty image..."
 singularity create -s $size $new_container_name
+echo "(2/9) Importing filesystem..."
 docker export $container_id | singularity import $new_container_name
 docker inspect $container_id >> $TMPDIR/singularity.json
 singularity copy $new_container_name $TMPDIR/singularity.json /
 
 # Bootstrap the image to set up scripts for environment setup
+echo "(3/9) Bootstrapping..."
 singularity bootstrap $new_container_name
 chmod a+rw -R $TMPDIR
 
 ################################################################################
 ### SINGULARITY RUN SCRIPT #####################################################
 ################################################################################
-
+echo "(4/9) Adding run script..."
 CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image)
 if [[ $CMD != [* ]]; then
     if [[ $CMD != "null" ]]; then
@@ -124,7 +127,7 @@ singularity copy $new_container_name $TMPDIR/singularity /
 ################################################################################
 ### SINGULARITY ENVIRONMENT ####################################################
 ################################################################################
-
+echo "(5/9) Setting ENV variables..."
 docker run --rm --entrypoint="/usr/bin/env" $image > $TMPDIR/docker_environment
 # don't include HOME and HOSTNAME - they mess with local config
 sed -i '/^HOME/d' $TMPDIR/docker_environment
@@ -139,12 +142,16 @@ rm -rf $TMPDIR
 ################################################################################
 
 # making sure that any user can read and execute everything in the container
-echo "Fixing permissions."
+echo "(6/9) Fixing permissions..."
 singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
 singularity exec --writable --contain $new_container_name /bin/sh -c "find / -executable -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
 
-echo "Adding mount points"
+echo "(7/9) Adding mount points..."
 singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p mkdir /oasis /projects /scratch /local-scratch"
 
-echo "Stopping container, please wait."
+echo "(8/9) Stopping and removing the container..."
 docker stop $container_id
+docker rm $container_id
+
+echo "(9/9) Moving the image to the output folder..."
+rsync --info=progress2 /tmp/$image_name-$creation_date-$container_id.img /output/
