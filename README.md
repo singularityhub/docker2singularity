@@ -47,7 +47,7 @@ You need to use the `docker info` command to check your docker version and use i
      filo/docker2singularity:1.11 \            
      ubuntu:14.04
 
-Currently only the 1.11 and 1.12 versions are supported. If you are using an older version of Docker you will need to upgrade.
+Currently only the 1.10, 1.11 and 1.12 versions are supported. If you are using an older version of Docker you will need to upgrade.
 
 ## Acknowledgements
 This work is heavily based on the `docker2singularity` work done by [vsoch](https://github.com/vsoch) and [gmkurtzer](https://github.com/gmkurtzer). Hopefully most of the conversion code will be merged into Singularity in the future making this container even leaner!
