@@ -140,14 +140,13 @@ rm -rf $TMPDIR
 ################################################################################
 ### Permissions ################################################################
 ################################################################################
+echo "(6/9) Adding mount points..."
+singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p mkdir /oasis /projects /scratch /local-scratch /work /home1 /corral-repl"
 
 # making sure that any user can read and execute everything in the container
-echo "(6/9) Fixing permissions..."
+echo "(7/9) Fixing permissions..."
 singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
 singularity exec --writable --contain $new_container_name /bin/sh -c "find / -executable -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
-
-echo "(7/9) Adding mount points..."
-singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p mkdir /oasis /projects /scratch /local-scratch"
 
 echo "(8/9) Stopping and removing the container..."
 docker stop $container_id
