@@ -13,13 +13,34 @@
 set -o errexit
 set -o nounset
 
-if [ -z $1 ]; then
-    echo "no Docker image specified!";
-    exit 1;
-else
-    image=$1
-fi
+USAGE="Usage: docker2singularity [-m \"/mount_point1 /mount_point2\"] docker_image_name"
 
+# --- Option processing --------------------------------------------
+if [ $# == 0 ] ; then
+    echo $USAGE
+    exit 1;
+fi
+mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /beegfs /share/PI /extra"
+while getopts ':hm:' option; do
+  case "$option" in
+    h) echo "$USAGE"
+       exit
+       ;;
+    m) mount_points=$OPTARG
+       ;;
+    :) printf "missing argument for -%s\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit 1
+       ;;
+   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit 1
+       ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+image=$1
 
 ################################################################################
 ### CONTAINER RUNNING ID #######################################################
@@ -144,7 +165,7 @@ rm -rf $TMPDIR
 ### Permissions ################################################################
 ################################################################################
 echo "(6/9) Adding mount points..."
-singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p /oasis /projects /scratch /local-scratch /work /home1 /corral-repl /beegfs /share/PI /extra"
+singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p ${mount_points}"
 
 # making sure that any user can read and execute everything in the container
 echo "(7/9) Fixing permissions..."
