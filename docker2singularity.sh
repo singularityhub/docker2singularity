@@ -141,7 +141,7 @@ rm -rf $TMPDIR
 ### Permissions ################################################################
 ################################################################################
 echo "(6/9) Adding mount points..."
-singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p mkdir /oasis /projects /scratch /local-scratch /work /home1 /corral-repl /beegfs /share/PI /extra"
+singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p /oasis /projects /scratch /local-scratch /work /home1 /corral-repl /beegfs /share/PI /extra"
 
 # making sure that any user can read and execute everything in the container
 echo "(7/9) Fixing permissions..."
