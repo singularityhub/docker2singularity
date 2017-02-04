@@ -133,6 +133,9 @@ docker run --rm --entrypoint="/usr/bin/env" $image > $TMPDIR/docker_environment
 sed -i '/^HOME/d' $TMPDIR/docker_environment
 sed -i '/^HOSTNAME/d' $TMPDIR/docker_environment
 sed -i 's/^/export /' $TMPDIR/docker_environment
+# add quotes around the variable names
+sed -i 's/=/="/' $TMPDIR/docker_environment
+sed -i 's/$/"/' $TMPDIR/docker_environment
 singularity copy $new_container_name $TMPDIR/docker_environment /
 singularity exec --writable $new_container_name /bin/sh -c "echo '. /docker_environment' >> /environment"
 rm -rf $TMPDIR
