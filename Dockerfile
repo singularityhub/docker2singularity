@@ -1,4 +1,4 @@
-FROM docker:1.12
+FROM docker:1.13
 
 RUN apk add --update automake libtool m4 autoconf alpine-sdk linux-headers && \
     wget -qO- https://github.com/gmkurtzer/singularity/archive/2.1.2.tar.gz | tar zxv && \
