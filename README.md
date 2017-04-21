@@ -1,6 +1,6 @@
 # `docker2singularity`
 
-Are you developing Docker images and you would like to run them on an HPC cluster supporting [Singularity](http://singularity.lbl.gov)? Are you working on Mac or Windows with no easy access to a Linux machine? `docker2singularity` is the simplest way to generate Singularity images.
+Are you developing Docker images and you would like to run them on an HPC cluster supporting [Singularity](http://singularity.lbl.gov)? Are you working on Mac or Windows with no easy access to a Linux machine? `docker2singularity` is the simplest way to generate Singularity images. Note that the upcoming Singularity (2.3) release supports import from Docker without sudo, natively, and this is the recommended approach. More information will be provided in the upcoming documentation for 2.3.
 
 ## Requirements
 
