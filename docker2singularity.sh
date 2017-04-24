@@ -20,7 +20,7 @@ if [ $# == 0 ] ; then
     echo $USAGE
     exit 1;
 fi
-mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /beegfs /share/PI /extra"
+mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /beegfs /share/PI /extra /data /oak"
 while getopts ':hm:' option; do
   case "$option" in
     h) echo "$USAGE"
