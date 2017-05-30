@@ -174,7 +174,8 @@ fi
 # making sure that any user can read and execute everything in the container
 echo "(7/9) Fixing permissions..."
 singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
-if grep -q Buildroot /etc/issue  ; then
+buildname=$(head -n 1 /etc/issue)
+if [[ $buildname =~ Buildroot|Alpine ]] ; then
     # we're running on a Builroot container and need to use Busybox's find
     echo "We're running on BusyBox/Buildroot"
     singularity exec --writable --contain $new_container_name /bin/sh -c "find / -type f -or -type d -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
