@@ -20,7 +20,7 @@ if [ $# == 0 ] ; then
     echo $USAGE
     exit 1;
 fi
-mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /beegfs /share/PI /extra /data /oak"
+mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /corral-tacc /beegfs /share/PI /extra /data /oak"
 while getopts ':hm:' option; do
   case "$option" in
     h) echo "$USAGE"
@@ -174,14 +174,7 @@ fi
 # making sure that any user can read and execute everything in the container
 echo "(7/9) Fixing permissions..."
 singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
-if grep -q Buildroot /etc/issue  ; then
-    # we're running on a Builroot container and need to use Busybox's find
-    echo "We're running on BusyBox/Buildroot"
-    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -type f -or -type d -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
-else
-    echo "We're not running on BusyBox/Buildroot"
-    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -executable -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
-fi
+singularity exec --writable --contain $new_container_name /bin/sh -c "find /* (-type f -or -type d) -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
 
 echo "(8/9) Stopping and removing the container..."
 docker stop $container_id
