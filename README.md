@@ -13,12 +13,12 @@ No need to download anything from this repository! Simply type:
 
      docker run \        
      -v /var/run/docker.sock:/var/run/docker.sock \
-     -v D:\host\path\where\to\ouptut\singularity\image:/output \
+     -v D:\host\path\where\to\output\singularity\image:/output \
      --privileged -t --rm \
      singularityware/docker2singularity \            
      ubuntu:14.04
 
-Replace `D:\host\path\where\to\ouptut\singularity\image` with a path on the host filesystem where your Singularity image will be created. Replace `ubuntu:14.04` with the docker image name you wish to convert (it will be pulled from Docker Hub if it does not exist on your host system).
+Replace `D:\host\path\where\to\output\singularity\image` with a path on the host filesystem where your Singularity image will be created. Replace `ubuntu:14.04` with the docker image name you wish to convert (it will be pulled from Docker Hub if it does not exist on your host system).
 
 `docker2singularity` uses the Docker daemon located on the host system. It will access the Docker image cache from the host system avoiding having to redownload images that are already present locally.
 
@@ -42,7 +42,7 @@ You need to use the `docker info` command to check your docker version and use i
 
      docker run \        
      -v /var/run/docker.sock:/var/run/docker.sock \
-     -v D:\host\path\where\to\ouptut\singularity\image:/output \
+     -v D:\host\path\where\to\output\singularity\image:/output \
      --privileged -t --rm \
      singularityware/docker2singularity:1.11 \            
      ubuntu:14.04
@@ -54,7 +54,7 @@ If you are getting `WARNING: Non existant bind point (directory) in container: '
 
      docker run \        
      -v /var/run/docker.sock:/var/run/docker.sock \
-     -v D:\host\path\where\to\ouptut\singularity\image:/output \
+     -v D:\host\path\where\to\output\singularity\image:/output \
      --privileged -t --rm \
      singularityware/docker2singularity \            
      -m "/shared_fs /custom_mountpoint2" \
