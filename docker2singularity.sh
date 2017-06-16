@@ -173,8 +173,8 @@ fi
 
 # making sure that any user can read and execute everything in the container
 echo "(7/9) Fixing permissions..."
-singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
-singularity exec --writable --contain $new_container_name /bin/sh -c "find /* (-type f -or -type d) -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
+singularity exec --writable --contain $new_container_name /bin/sh -c "find / -maxdepth 1 \( -path /dev -o -path /proc -o -path /sys \) -prune -o -exec chmod a+r -R '{}' \;"
+singularity exec --writable --contain $new_container_name /bin/sh -c "find / \( -type f -or -type d \) \( -path /dev -o -path /proc -o -path /sys \) -prune -o -perm -u+x,o-x -exec chmod a+x '{}' \;"
 
 echo "(8/9) Stopping and removing the container..."
 docker stop $container_id
