@@ -174,7 +174,8 @@ fi
 # making sure that any user can read and execute everything in the container
 echo "(7/9) Fixing permissions..."
 singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
-buildname=$(head -n 1 /etc/issue)
+buildname=$(singularity exec --contain $new_container_name /bin/sh -c "head -n 1 /etc/issue")
+echo $buildname
 if [[ $buildname =~ Buildroot|Alpine ]] ; then
     # we're running on a Builroot container and need to use Busybox's find
     echo "We're running on BusyBox/Buildroot"
