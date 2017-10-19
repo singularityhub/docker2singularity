@@ -43,6 +43,7 @@ if [ $# == 0 ] ; then
     echo $USAGE
     exit 1;
 fi
+
 mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /corral-tacc /beegfs /share/PI /extra /data /oak"
 while getopts ':hm:' option; do
   case "$option" in
@@ -108,9 +109,7 @@ size=`echo $(($size/1000000+1))`
 # I think it would be Ok by adding 1/3 of the size.
 size=`echo $(($size+$size/2))`
 
-echo "Size: $size MB for the singularity container"
-
-
+echo "Size: $size MB for the singularity container, although not needed for squashfs."
 
 
 ################################################################################
@@ -120,23 +119,20 @@ TMPDIR=$(mktemp -u -d)
 mkdir -p $TMPDIR
 
 creation_date=`echo ${creation_date} | cut -c1-10`
-new_container_name=/tmp/$image_name-$creation_date-$container_id.img
-echo "(1/9) Creating an empty image..."
-singularity create -s $size $new_container_name
-echo "(2/9) Importing filesystem..."
-docker export $container_id | singularity import $new_container_name
-docker inspect $container_id >> $TMPDIR/singularity.json
-singularity copy $new_container_name $TMPDIR/singularity.json /
+new_container_name=/tmp/$image_name-$creation_date-$container_id.simg
+build_sandbox="${new_container_name}.build"
+echo "(1/9) Creating a build sandbox..."
+mkdir -p ${build_sandbox}
+echo "(2/9) Exporting filesystem..."
+docker export $container_id >> $build_sandbox.tar
+singularity image.import $build_sandbox < $build_sandbox.tar
+docker inspect $container_id >> $build_sandbox/singularity.json
 
-# Bootstrap the image to set up scripts for environment setup
-echo "(3/9) Bootstrapping..."
-singularity bootstrap $new_container_name
-chmod a+rw -R $TMPDIR
 
 ################################################################################
 ### SINGULARITY RUN SCRIPT #####################################################
 ################################################################################
-echo "(4/9) Adding run script..."
+echo "(3/9) Adding run script..."
 CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image)
 if [[ $CMD != [* ]]; then
     if [[ $CMD != "null" ]]; then
@@ -156,61 +152,58 @@ fi
 # Remove quotes, commas, and braces
 ENTRYPOINT=`echo "${ENTRYPOINT//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,/ /g'`
 
-echo '#!/bin/sh' > $TMPDIR/singularity
+echo '#!/bin/sh' > $build_sandbox/singularity
 if [[ $ENTRYPOINT != "null" ]]; then
-    echo $ENTRYPOINT '$@' >> $TMPDIR/singularity;
+    echo $ENTRYPOINT '$@' >> $build_sandbox/singularity;
 else
     if [[ $CMD != "null" ]]; then
-        echo $CMD '$@' >> $TMPDIR/singularity;
+        echo $CMD '$@' >> $build_sandbox/singularity;
     fi
 fi
 
-chmod +x $TMPDIR/singularity
-singularity copy $new_container_name $TMPDIR/singularity /
+chmod +x $build_sandbox/singularity
+
 
 ################################################################################
 ### SINGULARITY ENVIRONMENT ####################################################
 ################################################################################
-echo "(5/9) Setting ENV variables..."
+echo "(4/9) Setting ENV variables..."
 docker run --rm --entrypoint="/usr/bin/env" $image > $TMPDIR/docker_environment
-# don't include HOME and HOSTNAME - they mess with local config
+# do not include HOME and HOSTNAME - they mess with local config
 sed -i '/^HOME/d' $TMPDIR/docker_environment
 sed -i '/^HOSTNAME/d' $TMPDIR/docker_environment
 sed -i 's/^/export /' $TMPDIR/docker_environment
 # add quotes around the variable names
 sed -i 's/=/="/' $TMPDIR/docker_environment
 sed -i 's/$/"/' $TMPDIR/docker_environment
-singularity copy $new_container_name $TMPDIR/docker_environment /
-singularity exec --writable $new_container_name /bin/sh -c "echo '. /docker_environment' >> /environment"
+cp $TMPDIR/docker_environment $build_sandbox/docker_environment
+echo '. /docker_environment' >> $build_sandbox/environment
 rm -rf $TMPDIR
+
 
 ################################################################################
 ### Permissions ################################################################
 ################################################################################
-if [ "${mount_points}" ]; then
-echo "(6/9) Adding mount points..."
-singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p ${mount_points}"
-else 
-echo "(6/9) Skipping mount points..."
+if [ "${mount_points}" ] ; then
+    echo "(5/9) Adding mount points..."
+    mkdir -p "${build_sandbox}/${mount_points}"
+else
+    echo "(5/9) Skipping mount points..."
 fi 
 
 # making sure that any user can read and execute everything in the container
-echo "(7/9) Fixing permissions..."
-singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
-buildname=$(singularity exec --contain $new_container_name /bin/sh -c "head -n 1 /etc/issue")
-echo $buildname
-if [[ $buildname =~ Buildroot|Alpine ]] ; then
-    # we're running on a Builroot container and need to use Busybox's find
-    echo "We're running on BusyBox/Buildroot"
-    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -type f -or -type d -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
-else
-    echo "We're not running on BusyBox/Buildroot"
-    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -executable -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
-fi
+echo "(6/9) Fixing permissions..."
 
-echo "(8/9) Stopping and removing the container..."
+find ${build_sandbox}/* -maxdepth 0 -not -path '${build_sandbox}/dev*' -not -path '${build_sandbox}/proc*' -not -path '${build_sandbox}/sys*' -exec chmod a+r -R '{}' \;
+find ${build_sandbox}/* -type f -or -type d -perm -u+x,o-x -not -path '${build_sandbox}/dev*' -not -path '${build_sandbox}/proc*' -not -path '${build_sandbox}/sys*' -exec chmod a+x '{}' \;
+
+echo "(7/9) Stopping and removing the container..."
 docker stop $container_id
 docker rm $container_id
 
+# Build a final image from the sandbox
+echo "(8/9) Building..."
+singularity build $new_container_name $build_sandbox
+
 echo "(9/9) Moving the image to the output folder..."
-rsync --info=progress2 /tmp/$image_name-$creation_date-$container_id.img /output/
+rsync --info=progress2 $new_container_name /output/
