@@ -36,21 +36,35 @@
 set -o errexit
 set -o nounset
 
-USAGE="Usage: docker2singularity [-m \"/mount_point1 /mount_point2\"] docker_image_name"
+USAGE="USAGE: docker2singularity [-m \"/mount_point1 /mount_point2\"] [options] docker_image_name"
 
 # --- Option processing --------------------------------------------
 if [ $# == 0 ] ; then
     echo $USAGE
+    echo "OPTIONS:
+
+          Image Format
+              -f: build development sandbox (folder)
+              -w: non-production writable image (ext3)         
+
+              Default is squashfs (recommended)
+              "
+
     exit 1;
 fi
 
 mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /corral-tacc /beegfs /share/PI /extra /data /oak"
-while getopts ':hm:' option; do
+image_format="squashfs"
+while getopts ':hm:wf' option; do
   case "$option" in
     h) echo "$USAGE"
-       exit
+       exit 0
        ;;
     m) mount_points=$OPTARG
+       ;;
+    f) image_format="sandbox"
+       ;;
+    w) image_format="writable"
        ;;
     :) printf "missing argument for -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
@@ -65,6 +79,9 @@ done
 shift $((OPTIND - 1))
 
 image=$1
+
+echo ""
+echo "Image Format: ${image_format}"
 
 ################################################################################
 ### CONTAINER RUNNING ID #######################################################
@@ -103,14 +120,10 @@ creation_date=`docker inspect --format="{{.Created}}" $image`
 ################################################################################
 
 size=`docker inspect --format="{{.Size}}" $image`
-# convert size in MB (it seems too small for singularity containers ...?). Add 1MB to round up (minimum).
+# convert size in MB
 size=`echo $(($size/1000000+1))`
-# adding half of the container size seems to work (do not know why exactly...?)
-# I think it would be Ok by adding 1/3 of the size.
-size=`echo $(($size+$size/2))`
-
-echo "Size: $size MB for the singularity container, although not needed for squashfs."
-
+echo "Inspected Size: $size MB"
+echo ""
 
 ################################################################################
 ### IMAGE CREATION #############################################################
@@ -119,7 +132,7 @@ TMPDIR=$(mktemp -u -d)
 mkdir -p $TMPDIR
 
 creation_date=`echo ${creation_date} | cut -c1-10`
-new_container_name=/tmp/$image_name-$creation_date-$container_id.simg
+new_container_name=/tmp/$image_name-$creation_date-$container_id
 build_sandbox="${new_container_name}.build"
 echo "(1/9) Creating a build sandbox..."
 mkdir -p ${build_sandbox}
@@ -128,6 +141,13 @@ docker export $container_id >> $build_sandbox.tar
 singularity image.import $build_sandbox < $build_sandbox.tar
 docker inspect $container_id >> $build_sandbox/singularity.json
 
+
+################################################################################
+### METADATA ###################################################################
+################################################################################
+
+# For docker2singularity, installation is at /usr/local
+zcat /usr/local/libexec/singularity/bootstrap-scripts/environment.tar | ( cd $build_sandbox; tar -xf - >/dev/null)
 
 ################################################################################
 ### SINGULARITY RUN SCRIPT #####################################################
@@ -152,16 +172,16 @@ fi
 # Remove quotes, commas, and braces
 ENTRYPOINT=`echo "${ENTRYPOINT//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,/ /g'`
 
-echo '#!/bin/sh' > $build_sandbox/singularity
+echo '#!/bin/sh' > $build_sandbox/.singularity.d/runscript
 if [[ $ENTRYPOINT != "null" ]]; then
-    echo $ENTRYPOINT '$@' >> $build_sandbox/singularity;
+    echo $ENTRYPOINT '$@' >> $build_sandbox/.singularity.d/runscript;
 else
     if [[ $CMD != "null" ]]; then
-        echo $CMD '$@' >> $build_sandbox/singularity;
+        echo $CMD '$@' >> $build_sandbox/.singularity.d/runscript;
     fi
 fi
 
-chmod +x $build_sandbox/singularity
+chmod +x $build_sandbox/.singularity.d/runscript;
 
 
 ################################################################################
@@ -176,8 +196,8 @@ sed -i 's/^/export /' $TMPDIR/docker_environment
 # add quotes around the variable names
 sed -i 's/=/="/' $TMPDIR/docker_environment
 sed -i 's/$/"/' $TMPDIR/docker_environment
-cp $TMPDIR/docker_environment $build_sandbox/docker_environment
-echo '. /docker_environment' >> $build_sandbox/environment
+cp $TMPDIR/docker_environment $build_sandbox/.singularity.d/env/10-docker.sh
+chmod +x $build_sandbox/.singularity.d/env/10-docker.sh;
 rm -rf $TMPDIR
 
 
@@ -198,12 +218,22 @@ find ${build_sandbox}/* -maxdepth 0 -not -path '${build_sandbox}/dev*' -not -pat
 find ${build_sandbox}/* -type f -or -type d -perm -u+x,o-x -not -path '${build_sandbox}/dev*' -not -path '${build_sandbox}/proc*' -not -path '${build_sandbox}/sys*' -exec chmod a+x '{}' \;
 
 echo "(7/9) Stopping and removing the container..."
-docker stop $container_id
-docker rm $container_id
+docker stop $container_id >> /dev/null
+docker rm $container_id >> /dev/null
 
 # Build a final image from the sandbox
-echo "(8/9) Building..."
-singularity build $new_container_name $build_sandbox
+echo "(8/9) Building ${image_format} container..."
+if [ "$image_format" == "squashfs" ]; then
+    new_container_name=${new_container_name}.simg
+    singularity build ${new_container_name} $build_sandbox
+elif [ "$image_format" == "writable" ]; then
+    new_container_name=${new_container_name}.img    
+    singularity build --writable ${new_container_name} $build_sandbox
+else
+    mv $build_sandbox $new_container_name
+fi
 
 echo "(9/9) Moving the image to the output folder..."
-rsync --info=progress2 $new_container_name /output/
+finalsize=`du -shm $new_container_name | cut -f1`
+rsync --info=progress2 -a $new_container_name /output/
+echo "Final Size: ${finalsize}MB"
