@@ -21,7 +21,7 @@ OPTIONS:
 
 **Image Format**
 
- - `squashfs` (no arguments specified) gives you a squashfs (`*.simg`) image. This is a compressed, reliable, and read only format that is recommended for production images.
+ - `squashfs` (no arguments specified) gives you a squashfs (`*.simg`) image. This is a compressed, reliable, and read only format that is recommended for production images. Squashfs support was added to Singularity proper in [January of 2017](https://github.com/singularityware/singularity/commit/0cf00d1251ff276d5b9b7a0e4eadb783a45a6b65#diff-8405d9d311d83f009adff55c3deb112c) and thus available as early as the 2.2.1 release.
  - `sandbox` (`-f`) builds your image into a sandbox **folder**. This is ideal for development, as it will produce a working image in a folder on your system.
  - `ext3` (`-w`) builds an older format (ext3) image (`*.img`). This format is not recommended for production images as we have observed degradation of the images over time, and they tend to be upwards of 1.5x to 2x the size of squashfs.
 
@@ -59,7 +59,7 @@ Squashfs is the recommended image type, it is compressed and less prone to degra
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
 -v /host/path/change/me:/output \
 --privileged -t --rm \
-singularityware/docker2singularity:2.4
+singularityware/docker2singularity
 ubuntu:14.04
 
 Image Format: squashfs
@@ -138,7 +138,7 @@ A sandbox image is a folder that is ideal for development. You can view it on yo
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
 -v /host/path/change/me:/output \
 --privileged -t --rm \
-singularityware/docker2singularity:2.4 \
+singularityware/docker2singularity \
 -f \
 ubuntu:14.04
 ```
@@ -155,7 +155,7 @@ You can build a legacy ext3 image (with `--writable`) with the `-w` flag. This i
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
 -v /host/path/change/me:/output \
 --privileged -t --rm \
-singularityware/docker2singularity:2.4 \
+singularityware/docker2singularity \
 -w \
 ubuntu:14.04
 ```
