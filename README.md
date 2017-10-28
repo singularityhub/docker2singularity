@@ -14,17 +14,18 @@ OPTIONS:
               -w: non-production writable image (ext3)         
 
               Default is squashfs (recommended)
+
 ```
 
 ### Options
 
 **Image Format**
 
- - `default` (no arguments specified) gives you a squashfs (`*.simg`) image. This is a compressed, reliable, and read only format that is recommended for production images.
- - `-f` builds your image into a sandbox folder. This is ideal for development, as it will produce a working image in a folder on your system.
- - `-w` builds an older format (ext3) image (`*.img`) with `--writable`. This format is not recommended for production images as we have observed degradation of the images over time, and they tend to be upwards of 1.5x to 2x the size of squashfs.
+ - `squashfs` (no arguments specified) gives you a squashfs (`*.simg`) image. This is a compressed, reliable, and read only format that is recommended for production images.
+ - `sandbox` (`-f`) builds your image into a sandbox **folder**. This is ideal for development, as it will produce a working image in a folder on your system.
+ - `ext3` (`-w`) builds an older format (ext3) image (`*.img`). This format is not recommended for production images as we have observed degradation of the images over time, and they tend to be upwards of 1.5x to 2x the size of squashfs.
 
-Note that you are able to convert easily from a folder or ext3 image using Singularity 2.4, if your choice is to develop, making changes, and then finalize. This approach is **not** recommended - your changes are not recorded and thus the image not reproducible.
+Note that you are able to convert easily from a folder or ext3 image using Singularity 2.4. If your choice is to develop, making changes, and then finalize, this approach is **not** recommended - your changes are not recorded and thus the image not reproducible.
 
 **Mount Points**
 
@@ -51,21 +52,6 @@ Intermediate versions built on [Docker Hub](https://hub.docker.com/r/singularity
 
 ## Examples
 
-No need to download anything from this repository! Simply type:
-
-```
-docker run \
--v /var/run/docker.sock:/var/run/docker.sock \
--v D:\host\path\where\to\output\singularity\image:/output \
---privileged -t --rm \
-singularityware/docker2singularity:2.4 \
-ubuntu:14.04
-```
-
-Replace `D:\host\path\where\to\output\singularity\image` with a path on the host filesystem where your Singularity image will be created. Replace `ubuntu:14.04` with the docker image name you wish to convert (it will be pulled from Docker Hub if it does not exist on your host system).
-
-`docker2singularity` uses the Docker daemon located on the host system. It will access the Docker image cache from the host system avoiding having to redownload images that are already present locally.
-
 ## Build a Squashfs Image
 Squashfs is the recommended image type, it is compressed and less prone to degradation over time. You don't need to specify anything special to create it:
 
@@ -75,12 +61,74 @@ docker run -v /var/run/docker.sock:/var/run/docker.sock \
 --privileged -t --rm \
 singularityware/docker2singularity:2.4
 ubuntu:14.04
+
+Image Format: squashfs
+Inspected Size: 188 MB
+
+(1/10) Creating a build sandbox...
+(2/10) Exporting filesystem...
+(3/10) Creating labels...
+(4/10) Adding run script...
+(5/10) Setting ENV variables...
+(6/10) Adding mount points...
+(7/10) Fixing permissions...
+(8/10) Stopping and removing the container...
+(9/10) Building squashfs container...
+Building image from sandbox: /tmp/ubuntu_14.04-2017-09-13-3e51deeadc7b.build
+Building Singularity image...
+Singularity container built: /tmp/ubuntu_14.04-2017-09-13-3e51deeadc7b.simg
+Cleaning up...
+(10/10) Moving the image to the output folder...
+     62,591,007 100%  340.92MB/s    0:00:00 (xfr#1, to-chk=0/1)
+Final Size: 60MB
 ```
+
+Notice how the image went from 188MB to 60MB? This reduction is even more impressive when we are dealing with
+very large images (e.g., ~3600 down to ~1800). A few notes on the inputs shown above that you should edit:
+
+ - `/host/path/change/me`: the path you want to have the final image reside. If you are on windows this might look like `D:\host\path\where\to\output\singularity\image`.
+ -`ubuntu:14.04`: the docker image name you wish to convert (it will be pulled from Docker Hub if it does not exist on your host system).
+
+`docker2singularity` uses the Docker daemon located on the host system. It will access the Docker image cache from the host system avoiding having to redownload images that are already present locally.
+
 If you ever need to make changes, you can easily export the squashfs image into either a sandbox folder or ext3 (legacy) image, both of which have writable.
 
 ```
 sudo singularity build --sandbox sandbox/ production.simg
 sudo singularity build --writable ext3.img production.simg
+```
+
+## Inspect Your Image
+New with `docker2singularity` 2.4, the labels for the container are available with `inspect`:
+
+```
+ singularity inspect ubuntu_14.04-2017-09-13-3e51deeadc7b.simg 
+{
+    "org.label-schema.singularity.build": "squashfs",
+    "org.label-schema.docker.version": "17.06.2-ce",
+    "org.label-schema.schema-version": "1.0",
+    "org.label-schema.singularity.build-type": "docker2singularity",
+    "org.label-schema.docker.id": "sha256:dea1945146b96542e6e20642830c78df702d524a113605a906397db1db022703",
+    "org.label-schema.build-date": "2017-10-28-17:19:18",
+    "org.label-schema.singularity.version": "2.4-dist",
+    "org.label-schema.docker.created": "2017-09-13"
+}
+```
+
+as is the runscript and environment
+
+```
+singularity inspect --json -e -r ubuntu_14.04-2017-09-13-3e51deeadc7b.simg 
+{
+    "data": {
+        "attributes": {
+            "environment": "# Custom environment shell code should follow\n\n",
+            "runscript": "#!/bin/sh\n/bin/bash $@\n"
+        },
+        "type": "container"
+    }
+}
+
 ```
 
 ## Build a Sandbox Image
