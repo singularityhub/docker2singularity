@@ -42,6 +42,7 @@ If you want a legacy version, see the following other branches:
 
  - [v2.3](https://github.com/singularityware/docker2singularity/tree/v2.3): Version 2.3 of Singularity. The image format is ext3.
  - [v2.4](https://github.com/singularityware/docker2singularity/tree/v2.4): Version 2.4 of Singularity. The default image format is squashfs.
+ - [v2.5](https://github.com/singularityware/docker2singularity/tree/v2.5): Version 2.5.1 of Singularity. Same as 2.4 but with many bug fixes.
 
 Intermediate versions built on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/tags/). A tag with prefix `v` corresponds to a release of the Singularity software, while the others are in reference to releases of Docker.
 
@@ -55,11 +56,19 @@ Intermediate versions built on [Docker Hub](https://hub.docker.com/r/singularity
 ## Build a Squashfs Image
 Squashfs is the recommended image type, it is compressed and less prone to degradation over time. You don't need to specify anything special to create it:
 
+This is a path on my host, the image will be written here
+
+```bash
+$ mkdir -p /tmp/test
 ```
+
+And here is the command to run. Notice that I am mounting the path `/tmp/test` that I created above to `/output` in the container, where the container image will be written (and seen on my host).
+
+```bash
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
--v /host/path/change/me:/output \
+-v /tmp/test:/output \
 --privileged -t --rm \
-singularityware/docker2singularity
+singularityware/docker2singularity \
 ubuntu:14.04
 
 Image Format: squashfs
@@ -83,10 +92,26 @@ Cleaning up...
 Final Size: 60MB
 ```
 
-Notice how the image went from 188MB to 60MB? This reduction is even more impressive when we are dealing with
-very large images (e.g., ~3600 down to ~1800). A few notes on the inputs shown above that you should edit:
+We can now see the finished image!
 
- - `/host/path/change/me`: the path you want to have the final image reside. If you are on windows this might look like `D:\host\path\where\to\output\singularity\image`.
+```bash
+$ ls /tmp/test
+ubuntu_14.04-2018-04-27-c7e04ea7fa32.simg
+```
+
+And use it!
+
+```bash
+$ singularity shell /tmp/test/ubuntu_14.04-2018-04-27-c7e04ea7fa32.simg
+Singularity: Invoking an interactive shell within container...
+
+Singularity ubuntu_14.04-2018-04-27-c7e04ea7fa32.simg:~/Documents/Dropbox/Code/singularity/docker2singularity> 
+```
+
+Take a look again at the generation code above, and notice how the image went from 188MB to 60MB? 
+This is one of the great things about the squashfs filesystem! This reduction is even more impressive when we are dealing with very large images (e.g., ~3600 down to ~1800). A few notes on the inputs shown above that you should edit:
+
+ - `/tmp/test`: the path you want to have the final image reside. If you are on windows this might look like `D:\host\path\where\to\output\singularity\image`.
  -`ubuntu:14.04`: the docker image name you wish to convert (it will be pulled from Docker Hub if it does not exist on your host system).
 
 `docker2singularity` uses the Docker daemon located on the host system. It will access the Docker image cache from the host system avoiding having to redownload images that are already present locally.

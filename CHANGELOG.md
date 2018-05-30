@@ -1,0 +1,18 @@
+# CHANGELOG
+
+This is a manually generated log to track changes to the repository for each release. 
+Each section should include general headers such as **Implemented enhancements** 
+and **Merged pull requests**. All closed issued and bug fixes should be 
+represented by the pull requests that fixed them. Critical items to know are:
+
+ - renamed commands
+ - deprecated / removed commands
+ - changed defaults
+ - backward incompatible changes (recipe file format? image file format?)
+ - migration guidance (how to convert images?)
+ - changed behaviour (recipe sections work differently)
+
+This changelog was started with version of Singularity v2.5, and reflects changes since then.
+
+## [master](https://github.com/singularityware/docker2singularity/tree/master) (master)
+ - update of Singularity from [v2.4](https://github.com/singularityware/docker2singularity/tree/v2.4) to [v2.5](https://github.com/singularityware/docker2singularity/tree/v2.5), including adding libarchive dependency (v2.5)
