@@ -36,11 +36,10 @@
 set -o errexit
 set -o nounset
 
-usage="USAGE: docker2singularity [-m \"/mount_point1 /mount_point2\"] [options] docker_image_name"
+function usage() {
 
-# --- Option processing --------------------------------------------
-if [ $# == 0 ] ; then
-    echo "${usage}"
+    echo "USAGE: docker2singularity [-m \"/mount_point1 /mount_point2\"] [options] docker_image_name"
+    echo ""
     echo "OPTIONS:
 
           Image Format
@@ -51,7 +50,11 @@ if [ $# == 0 ] ; then
               --mount    -m   provide list of custom mount points (in quotes!)
               --help     -h   show this help and exit
               "
+}
 
+# --- Option processing --------------------------------------------
+if [ $# == 0 ] ; then
+    usage
     exit 1;
 fi
 
@@ -62,7 +65,8 @@ new_container_name=""
 while true; do
     case ${1:-} in
         -h|--help|help)
-            echo "${usage}"
+            usage
+            usage
             exit 0
         ;;
         -n|--name)
@@ -86,16 +90,16 @@ while true; do
             shift
         ;;
         :) printf "missing argument for -%s\n" "$option" >&2
-           echo "$usage" >&2
+           usage
            exit 1
         ;;
         \?) printf "illegal option: -%s\n" "$option" >&2
-            echo "$usage" >&2
+            usage
             exit 1
         ;;
         -*)
             printf "illegal option: -%s\n" "$option" >&2
-            echo "$usage" >&2
+            usage
             exit 1
         ;;
         *)
