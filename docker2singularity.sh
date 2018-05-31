@@ -44,10 +44,12 @@ if [ $# == 0 ] ; then
     echo "OPTIONS:
 
           Image Format
-              -f: build development sandbox (folder)
-              -w: non-production writable image (ext3)         
-                  Default is squashfs (recommended)
-              -n: provide basename for the container (default based on URI)
+              --folder   -f   build development sandbox (folder)
+              --writable -w   non-production writable image (ext3)         
+                              Default is squashfs (recommended)
+              --name     -n   provide basename for the container (default based on URI)
+              --mount    -m   provide list of custom mount points (in quotes!)
+              --help     -h   show this help and exit
               "
 
     exit 1;
@@ -78,7 +80,7 @@ while true; do
             image_format="sandbox"
             shift
         ;;
-        -s|--sandbox)
+        -w|--wrtiable)
             shift
             image_format="writable"
             shift
