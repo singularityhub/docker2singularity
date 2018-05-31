@@ -36,18 +36,18 @@
 set -o errexit
 set -o nounset
 
-USAGE="USAGE: docker2singularity [-m \"/mount_point1 /mount_point2\"] [options] docker_image_name"
+usage="USAGE: docker2singularity [-m \"/mount_point1 /mount_point2\"] [options] docker_image_name"
 
 # --- Option processing --------------------------------------------
 if [ $# == 0 ] ; then
-    echo $USAGE
+    echo "${usage}"
     echo "OPTIONS:
 
           Image Format
               -f: build development sandbox (folder)
               -w: non-production writable image (ext3)         
-
-              Default is squashfs (recommended)
+                  Default is squashfs (recommended)
+              -n: provide basename for the container (default based on URI)
               "
 
     exit 1;
@@ -55,33 +55,64 @@ fi
 
 mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /corral-tacc /beegfs /share/PI /extra /data /oak"
 image_format="squashfs"
-while getopts ':hm:wf' option; do
-  case "$option" in
-    h) echo "$USAGE"
-       exit 0
-       ;;
-    m) mount_points=$OPTARG
-       ;;
-    f) image_format="sandbox"
-       ;;
-    w) image_format="writable"
-       ;;
-    :) printf "missing argument for -%s\n" "$OPTARG" >&2
-       echo "$usage" >&2
-       exit 1
-       ;;
-   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
-       echo "$usage" >&2
-       exit 1
-       ;;
-  esac
+new_container_name=""
+
+while true; do
+    case ${1:-} in
+        -h|--help|help)
+            echo "${usage}"
+            exit 0
+        ;;
+        -n|--name)
+            shift
+            new_container_name="${1:-}"
+            shift
+        ;;
+        -m|--mount)
+            shift
+            mount_points="${1:-}"
+            shift
+        ;;
+        -f|--folder)
+            shift
+            image_format="sandbox"
+            shift
+        ;;
+        -s|--sandbox)
+            shift
+            image_format="writable"
+            shift
+        ;;
+        :) printf "missing argument for -%s\n" "$option" >&2
+           echo "$usage" >&2
+           exit 1
+        ;;
+        \?) printf "illegal option: -%s\n" "$option" >&2
+            echo "$usage" >&2
+            exit 1
+        ;;
+        -*)
+            printf "illegal option: -%s\n" "$option" >&2
+            echo "$usage" >&2
+            exit 1
+        ;;
+        *)
+            break;
+        ;;
+    esac
 done
-shift $((OPTIND - 1))
 
 image=$1
 
 echo ""
 echo "Image Format: ${image_format}"
+echo "Docker Image: ${image}"
+
+if [ "${new_container_name}" != "" ]; then
+    echo "Container Name: ${new_container_name}"
+fi
+
+echo ""
 
 ################################################################################
 ### CONTAINER RUNNING ID #######################################################
@@ -132,8 +163,21 @@ TMPDIR=$(mktemp -u -d)
 mkdir -p $TMPDIR
 
 creation_date=`echo ${creation_date} | cut -c1-10`
-new_container_name=/tmp/$image_name-$creation_date-$container_id
+
+# The user has not provided a custom name
+if [ "${new_container_name}" == "" ]; then
+    new_container_name=/tmp/$image_name-$creation_date-$container_id
+
+# The user has provided a custom name
+else
+    new_container_name=/tmp/$(basename $new_container_name)
+    new_container_name="${new_container_name%.*}"
+fi
+
+
 build_sandbox="${new_container_name}.build"
+
+
 echo "(1/10) Creating a build sandbox..."
 mkdir -p ${build_sandbox}
 echo "(2/10) Exporting filesystem..."

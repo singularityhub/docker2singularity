@@ -65,7 +65,7 @@ $ mkdir -p /tmp/test
 And here is the command to run. Notice that I am mounting the path `/tmp/test` that I created above to `/output` in the container, where the container image will be written (and seen on my host).
 
 ```bash
-docker run -v /var/run/docker.sock:/var/run/docker.sock \
+$ docker run -v /var/run/docker.sock:/var/run/docker.sock \
 -v /tmp/test:/output \
 --privileged -t --rm \
 singularityware/docker2singularity \
@@ -123,6 +123,23 @@ If you ever need to make changes, you can easily export the squashfs image into 
 sudo singularity build --sandbox sandbox/ production.simg
 sudo singularity build --writable ext3.img production.simg
 ```
+
+## Custom Naming
+Added for version 2.5.1, you can specify the name of your container with the `-n/--name` argument, as follows:
+
+```bash
+docker run -v /var/run/docker.sock:/var/run/docker.sock \
+-v /tmp/test:/output \
+--privileged -t --rm \
+singularityware/docker2singularity \
+--name meatballs ubuntu:14.04
+
+...
+
+$ ls /tmp/test/
+meatballs.simg
+```
+
 
 ## Inspect Your Image
 New with `docker2singularity` 2.4, the labels for the container are available with `inspect`:
