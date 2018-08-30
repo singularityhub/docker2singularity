@@ -1,9 +1,9 @@
 FROM docker:1.13
 
 RUN apk add --update automake libtool libarchive libarchive-dev python m4 autoconf alpine-sdk linux-headers && \
-    wget -qO- https://github.com/singularityware/singularity/releases/download/2.5.1/singularity-2.5.1.tar.gz | tar zxv && \
-    cd singularity-2.5.1 && ./autogen.sh && ./configure --prefix=/usr/local && make && make install && \
-    cd ../ && rm -rf singularity-2.4 && \
+    wget -qO- https://github.com/singularityware/singularity/releases/download/2.6.0/singularity-2.6.0.tar.gz | tar zxv && \
+    cd singularity-2.6.0 && ./autogen.sh && ./configure --prefix=/usr/local && make && make install && \
+    cd ../ && rm -rf singularity-2.6 && \
     apk del automake libtool m4 autoconf alpine-sdk linux-headers
 
 RUN mkdir -p /usr/local/var/singularity/mnt

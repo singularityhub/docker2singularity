@@ -43,6 +43,7 @@ If you want a legacy version, see the following other branches:
  - [v2.3](https://github.com/singularityware/docker2singularity/tree/v2.3): Version 2.3 of Singularity. The image format is ext3.
  - [v2.4](https://github.com/singularityware/docker2singularity/tree/v2.4): Version 2.4 of Singularity. The default image format is squashfs.
  - [v2.5](https://github.com/singularityware/docker2singularity/tree/v2.5): Version 2.5.1 of Singularity. Same as 2.4 but with many bug fixes.
+ - [v2.6](https://github.com/singularityware/docker2singularity/tree/v2.6): Version 2.6 of Singularity.
 
 Intermediate versions built on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/tags/). A tag with prefix `v` corresponds to a release of the Singularity software, while the others are in reference to releases of Docker.
 
