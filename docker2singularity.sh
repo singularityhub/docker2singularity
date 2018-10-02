@@ -159,8 +159,8 @@ ENTRYPOINT=`echo "${ENTRYPOINT//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,
 echo '#!/bin/sh' > $TMPDIR/singularity
 
 WORKINGDIR=$(docker inspect --format='{{json .Config.WorkingDir}}' $image)
-if [[ $WORKINGDIR != "null" ]]; then
-         echo cd $WORKINGDIR >> $TMPDIR/singularity
+if [[ $WORKINGDIR != '""' ]]; then
+         echo cd $WORKINGDIR >> $TMPDIR/singularity;
 fi
 
 if [[ $ENTRYPOINT != "null" ]]; then
