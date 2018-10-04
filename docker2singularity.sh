@@ -55,7 +55,7 @@ function usage() {
 # --- Option processing --------------------------------------------
 if [ $# == 0 ] ; then
     usage
-    exit 1;
+    exit 0;
 fi
 
 mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /corral-tacc /beegfs /share/PI /extra /data /oak"
