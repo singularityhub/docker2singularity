@@ -86,4 +86,4 @@ singularity run --pwd /go/src/github.com/vsoch/salad $TMPDIR/chimichanga.simg fo
 test "$?" -eq "0" && echo "PASS" || echo "FAIL"
 
 echo "Cleaning up..."
-rm -rf "${TMPOIR}"
+rm -rf "${TMPDIR}"
