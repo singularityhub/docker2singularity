@@ -1,28 +1,220 @@
 # `docker2singularity`
 
-Are you developing Docker images and you would like to run them on an HPC cluster supporting [Singularity](http://singularity.lbl.gov)? Are you working on Mac or Windows with no easy access to a Linux machine? `docker2singularity` is the simplest way to generate Singularity images. Note that the upcoming Singularity (2.3) release supports import from Docker without sudo, natively, and this is the recommended approach. More information will be provided in the upcoming documentation for 2.3.
+![https://www.sylabs.io/guides/2.5.1/user-guide/_static/logo.png](https://www.sylabs.io/guides/2.5.1/user-guide/_static/logo.png)
+
+Are you developing Docker images and you would like to run them on an HPC cluster 
+supporting [Singularity](https://www.sylabs.io/guides/2.5.1/user-guide/introduction.html)? 
+Are you working on Mac or Windows with no easy access to a Linux machine? If the pull, 
+build, and general commands to [work with docker images provided by Singularity](https://www.sylabs.io/guides/2.5.1/user-guide/singularity_and_docker.html?highlight=docker) natively do not fit your needs, 
+`docker2singularity` is an alternative way to generate Singularity images. 
+This particular branch is intended for Singularity 2.5.1, which gives you a selection of image formats to build.
+The containers are also available for you on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/).
+
+## Usage
+
+```bash
+docker run singularityware/docker2singularity
+USAGE: docker2singularity [-m "/mount_point1 /mount_point2"] [options] docker_image_name
+OPTIONS:
+
+          Image Format
+              -f: build development sandbox (folder)
+              -w: non-production writable image (ext3)         
+
+              Default is squashfs (recommended)
+
+```
+
+### Options
+
+**Image Format**
+
+ - `squashfs` (no arguments specified) gives you a squashfs (`*.simg`) image. This is a compressed, reliable, and read only format that is recommended for production images. Squashfs support was added to Singularity proper in [January of 2017](https://github.com/singularityware/singularity/commit/0cf00d1251ff276d5b9b7a0e4eadb783a45a6b65#diff-8405d9d311d83f009adff55c3deb112c) and thus available as early as the 2.2.1 release.
+ - `sandbox` (`-f`) builds your image into a sandbox **folder**. This is ideal for development, as it will produce a working image in a folder on your system.
+ - `ext3` (`-w`) builds an older format (ext3) image (`*.img`). This format is not recommended for production images as we have observed degradation of the images over time, and they tend to be upwards of 1.5x to 2x the size of squashfs.
+
+Note that you are able to convert easily from a folder or ext3 image using Singularity 2.4. If your choice is to develop, making changes, and then finalize, this approach is **not** recommended - your changes are not recorded and thus the image not reproducible.
+
+**Mount Points**
+
+ - `-m` specify one or more mount points to create in the image.
+
+**Image Name**
+
+The last argument (without a letter) is the name of the docker image, as you would specify to run with Docker (e.g., `docker run ubuntu:latest`)
+
+
+## Legacy
+
+If you want a legacy version, see the following other branches:
+
+ - [v2.3](https://github.com/singularityware/docker2singularity/tree/v2.3): Version 2.3 of Singularity. The image format is ext3.
+ - [v2.4](https://github.com/singularityware/docker2singularity/tree/v2.4): Version 2.4 of Singularity. The default image format is squashfs.
+ - [v2.5](https://github.com/singularityware/docker2singularity/tree/v2.5): Version 2.5.1 of Singularity. Same as 2.4 but with many bug fixes.
+
+Intermediate versions built on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/tags/). A tag with prefix `v` corresponds to a release of the Singularity software, while the others are in reference to releases of Docker.
 
 ## Requirements
 
  - Docker (native Linux or Docker for Mac or Docker for Windows) - to create the Singularity image.
- - Singularity >= 2.1 - to run the Singularity image (**versions 2.0 and older are not supported!**).
+ - Singularity >= 2.1 - to run the Singularity image (**versions 2.0 and older are not supported!**). Note that if running a 2.4 image using earlier versions, not all (later developed) features may be available.
 
-## Usage
+## Examples
 
-No need to download anything from this repository! Simply type:
+## Build a Squashfs Image
+Squashfs is the recommended image type, it is compressed and less prone to degradation over time. You don't need to specify anything special to create it:
 
+This is a path on my host, the image will be written here
+
+```bash
+$ mkdir -p /tmp/test
 ```
-docker run \
--v /var/run/docker.sock:/var/run/docker.sock \
--v D:\host\path\where\to\output\singularity\image:/output \
+
+And here is the command to run. Notice that I am mounting the path `/tmp/test` that I created above to `/output` in the container, where the container image will be written (and seen on my host).
+
+```bash
+$ docker run -v /var/run/docker.sock:/var/run/docker.sock \
+-v /tmp/test:/output \
 --privileged -t --rm \
 singularityware/docker2singularity \
 ubuntu:14.04
+
+Image Format: squashfs
+Inspected Size: 188 MB
+
+(1/10) Creating a build sandbox...
+(2/10) Exporting filesystem...
+(3/10) Creating labels...
+(4/10) Adding run script...
+(5/10) Setting ENV variables...
+(6/10) Adding mount points...
+(7/10) Fixing permissions...
+(8/10) Stopping and removing the container...
+(9/10) Building squashfs container...
+Building image from sandbox: /tmp/ubuntu_14.04-2017-09-13-3e51deeadc7b.build
+Building Singularity image...
+Singularity container built: /tmp/ubuntu_14.04-2017-09-13-3e51deeadc7b.simg
+Cleaning up...
+(10/10) Moving the image to the output folder...
+     62,591,007 100%  340.92MB/s    0:00:00 (xfr#1, to-chk=0/1)
+Final Size: 60MB
 ```
 
-Replace `D:\host\path\where\to\output\singularity\image` with a path on the host filesystem where your Singularity image will be created. Replace `ubuntu:14.04` with the docker image name you wish to convert (it will be pulled from Docker Hub if it does not exist on your host system).
+We can now see the finished image!
+
+```bash
+$ ls /tmp/test
+ubuntu_14.04-2018-04-27-c7e04ea7fa32.simg
+```
+
+And use it!
+
+```bash
+$ singularity shell /tmp/test/ubuntu_14.04-2018-04-27-c7e04ea7fa32.simg
+Singularity: Invoking an interactive shell within container...
+
+Singularity ubuntu_14.04-2018-04-27-c7e04ea7fa32.simg:~/Documents/Dropbox/Code/singularity/docker2singularity> 
+```
+
+Take a look again at the generation code above, and notice how the image went from 188MB to 60MB? 
+This is one of the great things about the squashfs filesystem! This reduction is even more impressive when we are dealing with very large images (e.g., ~3600 down to ~1800). A few notes on the inputs shown above that you should edit:
+
+ - `/tmp/test`: the path you want to have the final image reside. If you are on windows this might look like `D:\host\path\where\to\output\singularity\image`.
+ -`ubuntu:14.04`: the docker image name you wish to convert (it will be pulled from Docker Hub if it does not exist on your host system).
 
 `docker2singularity` uses the Docker daemon located on the host system. It will access the Docker image cache from the host system avoiding having to redownload images that are already present locally.
+
+
+If you ever need to make changes, you can easily export the squashfs image into either a sandbox folder or ext3 (legacy) image, both of which have writable.
+
+```
+sudo singularity build --sandbox sandbox/ production.simg
+sudo singularity build --writable ext3.img production.simg
+```
+
+## Custom Naming
+Added for version 2.5.1, you can specify the name of your container with the `-n/--name` argument, as follows:
+
+```bash
+docker run -v /var/run/docker.sock:/var/run/docker.sock \
+-v /tmp/test:/output \
+--privileged -t --rm \
+singularityware/docker2singularity \
+--name meatballs ubuntu:14.04
+
+...
+
+$ ls /tmp/test/
+meatballs.simg
+```
+
+
+## Inspect Your Image
+New with `docker2singularity` 2.4, the labels for the container are available with `inspect`:
+
+```bash
+ singularity inspect ubuntu_14.04-2017-09-13-3e51deeadc7b.simg 
+{
+    "org.label-schema.singularity.build": "squashfs",
+    "org.label-schema.docker.version": "17.06.2-ce",
+    "org.label-schema.schema-version": "1.0",
+    "org.label-schema.singularity.build-type": "docker2singularity",
+    "org.label-schema.docker.id": "sha256:dea1945146b96542e6e20642830c78df702d524a113605a906397db1db022703",
+    "org.label-schema.build-date": "2017-10-28-17:19:18",
+    "org.label-schema.singularity.version": "2.4-dist",
+    "org.label-schema.docker.created": "2017-09-13"
+}
+```
+
+as is the runscript and environment
+
+```bash
+singularity inspect --json -e -r ubuntu_14.04-2017-09-13-3e51deeadc7b.simg 
+{
+    "data": {
+        "attributes": {
+            "environment": "# Custom environment shell code should follow\n\n",
+            "runscript": "#!/bin/sh\n/bin/bash $@\n"
+        },
+        "type": "container"
+    }
+}
+
+```
+
+## Build a Sandbox Image
+A sandbox image is a folder that is ideal for development. You can view it on your desktop, cd inside and browse, and it works like a Singularity image. To create a sandbox, specify the `-f` flag:
+
+```bash
+docker run -v /var/run/docker.sock:/var/run/docker.sock \
+-v /host/path/change/me:/output \
+--privileged -t --rm \
+singularityware/docker2singularity \
+-f \
+ubuntu:14.04
+```
+Importantly, you can use `--writable`, and if needed, you can convert a sandbox folder into a production image:
+
+```bash
+sudo singularity build sandbox/ production.simg
+```
+
+## Build a Legacy (ext3) Image
+You can build a legacy ext3 image (with `--writable`) with the `-w` flag. This is an older image format that is more prone to degradation over time, and (building) may not be supported for future versions of the software.
+
+```bash
+docker run -v /var/run/docker.sock:/var/run/docker.sock \
+-v /host/path/change/me:/output \
+--privileged -t --rm \
+singularityware/docker2singularity \
+-w \
+ubuntu:14.04
+```
+You can also use `--writable` and convert an ext3 image into a production image:
+
+```bash
+sudo singularity build ext3.img production.simg
+```
 
 ### Contributed Examples
 The following are a list of brief examples and tutorials generated by the Singularity community for using **docker2singularity**. If you have an example of your own, please [let us know](https://www.github.com/singularityware/docker2singularity/issues)!
@@ -42,24 +234,30 @@ The following are a list of brief examples and tutorials generated by the Singul
  - Don’t use the USER instruction set
 
 ## FAQ
+Here are some frequently asked questions if you run into trouble! 
+
 ### "client is newer than server" error
 If you are getting the following error:
 `docker: Error response from daemon: client is newer than server`
 
 You need to use the `docker info` command to check your docker version and use it to grab the correct corresponding version of `docker2singularity`. For example:
 
+```bash
      docker run \        
      -v /var/run/docker.sock:/var/run/docker.sock \
      -v D:\host\path\where\to\output\singularity\image:/output \
      --privileged -t --rm \
      singularityware/docker2singularity:1.11 \            
      ubuntu:14.04
+```
 
 Currently only the 1.10, 1.11, 1.12, and 1.13  versions are supported. If you are using an older version of Docker you will need to upgrade.
+
 
 ### My cluster/HPC requires Singularity images to include specific mount points
 If you are getting `WARNING: Non existant bind point (directory) in container: '/shared_fs'` or a similar error when running your Singularity image that means that your Singularity images require custom mount points. To make the error go away you can specify the mount points required by your system when creating the Singularity image:
 
+```bash
      docker run \        
      -v /var/run/docker.sock:/var/run/docker.sock \
      -v D:\host\path\where\to\output\singularity\image:/output \
@@ -67,7 +265,11 @@ If you are getting `WARNING: Non existant bind point (directory) in container: '
      singularityware/docker2singularity \            
      -m "/shared_fs /custom_mountpoint2" \
      ubuntu:14.04
-     
-     
+```
+
 ## Acknowledgements
-This work is heavily based on the `docker2singularity` work done by [vsoch](https://github.com/vsoch) and [gmkurtzer](https://github.com/gmkurtzer). Hopefully most of the conversion code will be merged into Singularity in the future making this container even leaner!
+
+This work is heavily based on the `docker2singularity` work done by [vsoch](https://github.com/vsoch) 
+and [gmkurtzer](https://github.com/gmkurtzer). The original record of the work can be read about
+in [this commit](https://github.com/singularityware/docker2singularity/commit/d174cadefd90f77f302f4bef5a8cd089eb2da2e4).
+Thank you kindly to all the contributors, and please open an issue if you need help.
