@@ -83,7 +83,7 @@ while true; do
             image_format="sandbox"
             shift
         ;;
-        -w|--wrtiable)
+        -w|--writable)
             shift
             image_format="writable"
             shift
