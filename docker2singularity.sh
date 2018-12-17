@@ -81,12 +81,10 @@ while true; do
         -f|--folder)
             shift
             image_format="sandbox"
-            shift
         ;;
-        -w|--wrtiable)
+        -w|--writable)
             shift
             image_format="writable"
-            shift
         ;;
         :) printf "missing argument for -%s\n" "$option" >&2
            usage
