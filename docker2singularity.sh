@@ -44,7 +44,7 @@ function usage() {
 
           Image Format
               --folder   -f   build development sandbox (folder)
-              --writable -w   non-production writable image (ext3)         
+              --writable -w   non-production writable image (ext3)
                               Default is squashfs (recommended)
               --name     -n   provide basename for the container (default based on URI)
               --mount    -m   provide list of custom mount points (in quotes!)
@@ -221,8 +221,8 @@ DOCKER_ID=$(docker inspect --format='{{json .Id}}' $image)
 # Add labels from Docker, then relevant to Singularity build
 echo $LABELS > $LABELFILE;
 eval $ADD_LABEL --key "org.label-schema.schema-version" --value "1.0"
-eval $ADD_LABEL --key "org.label-schema.singularity.build-type" --value "docker2singularity" 
-eval $ADD_LABEL --key "org.label-schema.singularity.build" --value "${image_format}" 
+eval $ADD_LABEL --key "org.label-schema.singularity.build-type" --value "docker2singularity"
+eval $ADD_LABEL --key "org.label-schema.singularity.build" --value "${image_format}"
 eval $ADD_LABEL --key "org.label-schema.build-date" --value $(date +%Y-%m-%d-%H:%M:%S)
 eval $ADD_LABEL --key "org.label-schema.singularity.version" --value "${SINGULARITY_VERSION}"
 eval $ADD_LABEL --key "org.label-schema.docker.version" --value "${DOCKER_VERSION}"
@@ -292,7 +292,7 @@ if [ "${mount_points}" ] ; then
     mkdir -p "${build_sandbox}/${mount_points}"
 else
     echo "(6/10) Skipping mount points..."
-fi 
+fi
 
 # making sure that any user can read and execute everything in the container
 echo "(7/10) Fixing permissions..."
@@ -310,7 +310,7 @@ if [ "$image_format" == "squashfs" ]; then
     new_container_name=${new_container_name}.simg
     singularity build ${new_container_name} $build_sandbox
 elif [ "$image_format" == "writable" ]; then
-    new_container_name=${new_container_name}.img    
+    new_container_name=${new_container_name}.img
     singularity build --writable ${new_container_name} $build_sandbox
 else
     mv $build_sandbox $new_container_name
