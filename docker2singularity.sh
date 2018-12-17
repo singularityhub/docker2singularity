@@ -87,8 +87,8 @@ while true; do
             image_format="writable"
         ;;
         :) printf "missing argument for -%s\n" "$option" >&2
-           usage
-           exit 1
+            usage
+            exit 1
         ;;
         \?) printf "illegal option: -%s\n" "$option" >&2
             usage
