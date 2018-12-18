@@ -48,6 +48,8 @@ function usage() {
                               Default is squashfs (recommended)
               --name     -n   provide basename for the container (default based on URI)
               --mount    -m   provide list of custom mount points (in quotes!)
+              --uid      -u   numeric user id by which final image should owned (must be combined with --gid)
+              --gid      -g   numeric group id by which final image should owned (must be combined with --uid)
               --help     -h   show this help and exit
               "
 }
@@ -61,6 +63,8 @@ fi
 mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /corral-tacc /beegfs /share/PI /extra /data /oak"
 image_format="squashfs"
 new_container_name=""
+uid=""
+gid=""
 
 while true; do
     case ${1:-} in
@@ -85,6 +89,16 @@ while true; do
         -w|--writable)
             shift
             image_format="writable"
+        ;;
+        -u|--uid)
+            shift
+            uid="${1:-}"
+            shift
+        ;;
+        -g|--gid)
+            shift
+            gid="${1:-}"
+            shift
         ;;
         :) printf "missing argument for -%s\n" "$option" >&2
             usage
@@ -316,5 +330,9 @@ fi
 
 echo "(10/10) Moving the image to the output folder..."
 finalsize=`du -shm $new_container_name | cut -f1`
-rsync --info=progress2 -a $new_container_name /output/
+if [[ -z "${uid}" || -z "${gid}" ]]; then
+    rsync --info=progress2 -a $new_container_name /output/
+else
+    rsync --info=progress2 -a --chown="${uid}:${gid}" $new_container_name /output/
+fi
 echo "Final Size: ${finalsize}MB"
