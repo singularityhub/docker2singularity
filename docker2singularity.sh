@@ -193,7 +193,7 @@ if [ "${mount_points}" ] ; then
         singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p ${mount_point}"
     done
 else
-    echo "(6/10) Skipping mount points..."
+    echo "(6/9) Skipping mount points..."
 fi 
 
 # making sure that any user can read and execute everything in the container
