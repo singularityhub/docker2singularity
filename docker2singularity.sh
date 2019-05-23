@@ -290,7 +290,7 @@ rm -rf $TMPDIR
 if [ "${mount_points}" ] ; then
     echo "(6/10) Adding mount points..."
     for mount_point in ${mount_points}; do
-        mkdir -p "${build_sandbox}/${mount_points}"
+        mkdir -p "${build_sandbox}/${mount_point}"
     done
 else
     echo "(6/10) Skipping mount points..."
