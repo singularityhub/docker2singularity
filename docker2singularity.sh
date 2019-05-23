@@ -196,10 +196,6 @@ else
     echo "(6/10) Skipping mount points..."
 fi 
 
-else 
-echo "(6/9) Skipping mount points..."
-fi 
-
 # making sure that any user can read and execute everything in the container
 echo "(7/9) Fixing permissions..."
 singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
