@@ -78,7 +78,7 @@ test: &test
       DOCKER_TAG="v$(cat VERSION)"
       echo "1. Testing run without arguments..."
       echo "docker run ${CONTAINER_NAME}:${DOCKER_TAG}"
-      docker run "${CONTAINER_NAME}:${DOCKER_TAG}"
+      docker run "${CONTAINER_NAME}:${DOCKER_TAG}" || true
       echo "Return value $?"
 
 ################################################################################
