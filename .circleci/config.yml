@@ -167,6 +167,9 @@ workflows:
             - update_cache
           filters:
             branches:
-              only: master
+              only: 
+               - master
+               - v2.*
+               - v3.*
             tags:
               only: /.*/
