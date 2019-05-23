@@ -12,7 +12,7 @@
 # USAGE: docker2singularity.sh ubuntu:14.04
 #
 #
-# Copyright (c) 2016-2017 Vanessa Sochat, All Rights Reserved
+# Copyright (c) 2016-2019 Vanessa Sochat, All Rights Reserved
 # Copyright (c) 2017 Singularityware LLC and AUTHORS
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -240,7 +240,9 @@ rm -rf $TMPDIR
 ################################################################################
 if [ "${mount_points}" ] ; then
     echo "(6/10) Adding mount points..."
-    mkdir -p "${build_sandbox}/${mount_points}"
+    for mount_point in ${mount_points}; do
+        singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p ${mount_point}"
+    done
 else
     echo "(6/10) Skipping mount points..."
 fi 
