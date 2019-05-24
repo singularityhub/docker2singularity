@@ -1,0 +1,175 @@
+# This is a continuous build CircleCI configuration for a Docker container
+# intended to bulid on CircleCI to spread out testing over Travis/Circle.
+# The container is built and pushed to the CONTAINER_NAME variable
+# defined here or within the CircleCI settings. The following environment
+# variables are acceptable here or in these settings (for sensitive information)
+#
+# CONTAINER_NAME
+# DOCKER_USER
+# DOCKER_EMAIL
+
+################################################################################
+# Functions
+################################################################################
+
+# Defaults
+
+defaults: &defaults
+  docker:
+    - image: docker:18.01.0-ce-git
+  working_directory: /tmp/src
+  environment:
+    - CONTAINER_NAME: singularityware/docker2singularity
+
+# Installation
+
+install: &install
+    name: Install parallel gzip, gettext, python3, and jq
+    command: apk add --no-cache pigz python3 gettext jq
+
+
+dockerload: &dockerload
+    name: Load Docker container Image
+    no_output_timeout: 30m
+    command: | 
+      echo "Working directory is ${PWD}"
+      docker info
+      set +o pipefail
+      if [ -f /tmp/cache/container.tar.gz ]; then
+          apk update && apk add --no-cache pigz curl curl-dev
+          pigz -d --stdout /tmp/cache/container.tar.gz | docker load
+      fi
+      
+
+dockersave: &dockersave
+    name: Docker Save
+    no_output_timeout: 40m
+    command: |
+      DOCKER_TAG="v$(cat VERSION)"
+      echo "Saving ${CONTAINER_NAME}:${DOCKER_TAG} to container.tar.gz"
+      mkdir -p /tmp/cache
+      docker save ${CONTAINER_NAME}:${DOCKER_TAG} \
+        | pigz -2 -p 3 > /tmp/cache/container.tar.gz
+
+
+dockerdeploy: &dockerdeploy
+    name: Deploy to Docker Hub
+    no_output_timeout: 40m
+    command: |
+      docker images
+      DOCKER_TAG="v$(cat VERSION)"
+      echo "Container name set to ${CONTAINER_NAME}:${DOCKER_TAG}"
+      if [[ -n "$DOCKER_PASS" ]]; then
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push ${CONTAINER_NAME}:${DOCKER_TAG}
+      fi
+
+dockerbuild: &dockerbuild
+    name: Build development Docker container
+    command: |
+      echo "Building base image..."
+      DOCKER_TAG="v$(cat VERSION)"
+      docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} .
+
+test: &test
+    name: Test using docker2singularity
+    command: |
+      echo "Testing docker2singularity entrypoint"
+      DOCKER_TAG="v$(cat VERSION)"
+      echo "1. Testing run without arguments..."
+      echo "docker run ${CONTAINER_NAME}:${DOCKER_TAG}"
+      docker run "${CONTAINER_NAME}:${DOCKER_TAG}"
+      echo "Return value $?"
+
+################################################################################
+# Jobs
+################################################################################
+
+
+version: 2
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - docker-v1-{{ .Branch }}
+          paths:
+            - /tmp/cache/container.tar.gz
+      - restore_cache:
+          key: dependency-cache
+      - setup_remote_docker
+      - run: *install
+      - run: *dockerload
+      - run: *dockerbuild
+      - run: *test
+      - run: *dockersave
+      - persist_to_workspace:
+            root: /tmp
+            paths:
+                - src
+                - cache
+
+  update_cache:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - save_cache:
+         key: docker-v1-{{ .Branch }}
+         paths:
+            - /tmp/cache/container.tar.gz
+
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - setup_remote_docker
+      - run: *dockerload
+      - run: *dockerdeploy
+
+
+################################################################################
+# Workflows
+################################################################################
+
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: 
+                - gh-pages
+                - /docs?/.*/
+            tags:
+              only: /.*/
+
+      - update_cache:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: 
+                - gh-pages
+                - /docs?/.*/
+            tags:
+              only: /.*/
+
+      # Upload the container to Docker Hub
+      - deploy:
+          requires:
+            - build
+            - update_cache
+          filters:
+            branches:
+              only: 
+               - master
+               - v2.*
+               - v3.*
+            tags:
+              only: /.*/
