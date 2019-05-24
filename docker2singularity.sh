@@ -287,8 +287,9 @@ rm -rf $TMPDIR
 ################################################################################
 ### Permissions ################################################################
 ################################################################################
+
 if [ "${mount_points}" ] ; then
-    echo "(6/10) Adding mount points..."
+    echo "(6/10) Adding mount points: ${mount_points} "
     for mount_point in ${mount_points}; do
         mkdir -p "${build_sandbox}/${mount_point}"
     done
