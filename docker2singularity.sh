@@ -186,26 +186,21 @@ unset SINGULARITY_MESSAGELEVEL
 ### SINGULARITY RUN SCRIPT #####################################################
 ################################################################################
 echo "(4/10) Adding run script..."
-CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image)
-if [[ $CMD != [* ]]; then
-    if [[ $CMD != "null" ]]; then
-        CMD="/bin/sh -c "$CMD
-    fi
+
+function shell_escape () {
+    python -c 'import json, pipes, sys; print " ".join(pipes.quote(a) for a in json.load(sys.stdin) or [])'
+}
+
+CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image | shell_escape)
+ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $image | shell_escape)
+
+echo '#!/bin/sh -c' > $build_sandbox/.singularity.d/runscript
+
+# Take working directory into account
+WORKINGDIR=$(docker inspect --format='{{json .Config.WorkingDir}}' $image)
+if [[ $WORKINGDIR != '""' ]]; then
+    echo cd $WORKINGDIR >> $build_sandbox/.singularity.d/runscript
 fi
-# Remove quotes, commas, and braces
-CMD=`echo "${CMD//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,//g'`
-
-ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $image)
-if [[ $ENTRYPOINT != [* ]]; then
-    if [[ $ENTRYPOINT != "null" ]]; then
-        ENTRYPOINT="/bin/sh -c "$ENTRYPOINT
-    fi
-fi
-
-# Remove quotes, commas, and braces
-ENTRYPOINT=`echo "${ENTRYPOINT//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,/ /g'`
-
-echo '#!/bin/sh' > $build_sandbox/.singularity.d/runscript
 
 # First preference goes to both entrypoint / cmd, then individual
 if [ -n "$ENTRYPOINT" ] && [ -n "$CMD" ]; then
@@ -217,7 +212,6 @@ elif [ -n "$CMD" ]; then
 fi
 
 chmod +x $build_sandbox/.singularity.d/runscript;
-
 
 ################################################################################
 ### SINGULARITY ENVIRONMENT ####################################################
