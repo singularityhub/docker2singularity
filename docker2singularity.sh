@@ -194,7 +194,7 @@ function shell_escape () {
 CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image | shell_escape)
 ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $image | shell_escape)
 
-echo '#!/bin/sh -c' > $build_sandbox/.singularity.d/runscript
+echo '#!/bin/sh' > $build_sandbox/.singularity.d/runscript
 
 # Take working directory into account
 WORKINGDIR=$(docker inspect --format='{{json .Config.WorkingDir}}' $image)
@@ -237,7 +237,7 @@ rm -rf $TMPDIR
 if [ "${mount_points}" ] ; then
     echo "(6/10) Adding mount points..."
     for mount_point in ${mount_points}; do
-        singularity exec --writable --contain $new_container_name /bin/sh -c "mkdir -p ${mount_point}"
+        mkdir -p "$build_sandbox/${mount_point}"
     done
 else
     echo "(6/10) Skipping mount points..."
