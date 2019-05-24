@@ -1,4 +1,4 @@
-FROM docker:1.13
+FROM docker:18.09
 
 RUN apk add --update automake libtool libarchive libarchive-dev python m4 autoconf alpine-sdk linux-headers && \
     wget -qO- https://github.com/singularityware/singularity/releases/download/2.5.1/singularity-2.5.1.tar.gz | tar zxv && \
