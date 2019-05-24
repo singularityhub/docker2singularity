@@ -206,12 +206,14 @@ fi
 ENTRYPOINT=`echo "${ENTRYPOINT//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,/ /g'`
 
 echo '#!/bin/sh' > $build_sandbox/.singularity.d/runscript
-if [[ $ENTRYPOINT != "null" ]]; then
-    echo $ENTRYPOINT '$@' >> $build_sandbox/.singularity.d/runscript;
-else
-    if [[ $CMD != "null" ]]; then
-        echo $CMD '$@' >> $build_sandbox/.singularity.d/runscript;
-    fi
+
+# First preference goes to both entrypoint / cmd, then individual
+if [ -n "$ENTRYPOINT" ] && [ -n "$CMD" ]; then
+    echo exec "$ENTRYPOINT" "$CMD" '"$@"' >> $build_sandbox/.singularity.d/runscript;
+elif [ -n "$ENTRYPOINT" ]; then
+    echo exec "$ENTRYPOINT" '"$@"' >> $build_sandbox/.singularity.d/runscript;
+elif [ -n "$CMD" ]; then
+    echo exec "$CMD" '"$@"' >> $build_sandbox/.singularity.d/runscript;
 fi
 
 chmod +x $build_sandbox/.singularity.d/runscript;
