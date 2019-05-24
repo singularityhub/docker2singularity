@@ -83,7 +83,7 @@ while true; do
             image_format="sandbox"
             shift
         ;;
-        -w|--wrtiable)
+        -w|--writable)
             shift
             image_format="writable"
             shift
@@ -187,7 +187,7 @@ echo "(1/10) Creating a build sandbox..."
 mkdir -p ${build_sandbox}
 echo "(2/10) Exporting filesystem..."
 docker export $container_id >> $build_sandbox.tar
-singularity image.import $build_sandbox < $build_sandbox.tar
+tar -C $build_sandbox -xf $build_sandbox.tar
 docker inspect $container_id >> $build_sandbox/singularity.json
 
 
@@ -201,16 +201,17 @@ export SINGULARITY_MESSAGELEVEL
 
 # For docker2singularity, installation is at /usr/local
 echo "(3/10) Creating labels..."
-libexec="/usr/local/libexec/singularity"
-zcat "${libexec}/bootstrap-scripts/environment.tar" | ( cd $build_sandbox; tar -xf - >/dev/null)
 LABELS=$(docker inspect --format='{{json .Config.Labels}}' $image)
 LABELFILE=$(printf "%q" "$build_sandbox/.singularity.d/labels.json")
-ADD_LABEL="${libexec}/python/helpers/json/add.py -f --file ${LABELFILE}"
+ADD_LABEL="/addLabel.py -f --file ${LABELFILE}"
 
 # Labels could be null
 if [ "${LABELS}" == "null" ]; then
     LABELS="{}"
 fi
+
+mkdir -p $build_sandbox/.singularity.d
+touch ${LABELFILE}
 
 # Extract some other "nice to know" metadata from docker
 SINGULARITY_version=`singularity --version`
@@ -235,42 +236,44 @@ unset SINGULARITY_MESSAGELEVEL
 ### SINGULARITY RUN SCRIPT #####################################################
 ################################################################################
 echo "(4/10) Adding run script..."
-CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image)
-if [[ $CMD != [* ]]; then
-    if [[ $CMD != "null" ]]; then
-        CMD="/bin/sh -c "$CMD
-    fi
-fi
-# Remove quotes, commas, and braces
-CMD=`echo "${CMD//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,//g'`
 
-ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $image)
-if [[ $ENTRYPOINT != [* ]]; then
-    if [[ $ENTRYPOINT != "null" ]]; then
-        ENTRYPOINT="/bin/sh -c "$ENTRYPOINT
-    fi
-fi
+function shell_escape () {
+    python -c 'import json, pipes, sys; print " ".join(pipes.quote(a) for a in json.load(sys.stdin) or [])'
+}
 
-# Remove quotes, commas, and braces
-ENTRYPOINT=`echo "${ENTRYPOINT//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,/ /g'`
+CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image | shell_escape)
+ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $image | shell_escape)
 
 echo '#!/bin/sh' > $build_sandbox/.singularity.d/runscript
-if [[ $ENTRYPOINT != "null" ]]; then
-    echo $ENTRYPOINT '$@' >> $build_sandbox/.singularity.d/runscript;
-else
-    if [[ $CMD != "null" ]]; then
-        echo $CMD '$@' >> $build_sandbox/.singularity.d/runscript;
-    fi
+
+# Take working directory into account
+WORKINGDIR=$(docker inspect --format='{{json .Config.WorkingDir}}' $image)
+if [[ $WORKINGDIR != '""' ]]; then
+    echo cd $WORKINGDIR >> $build_sandbox/.singularity.d/runscript
+fi
+
+# First preference goes to both entrypoint / cmd, then individual
+if [ -n "$ENTRYPOINT" ] && [ -n "$CMD" ]; then
+    echo exec "$ENTRYPOINT" "$CMD" '"$@"' >> $build_sandbox/.singularity.d/runscript;
+elif [ -n "$ENTRYPOINT" ]; then
+    echo exec "$ENTRYPOINT" '"$@"' >> $build_sandbox/.singularity.d/runscript;
+elif [ -n "$CMD" ]; then
+    echo exec "$CMD" '"$@"' >> $build_sandbox/.singularity.d/runscript;
 fi
 
 chmod +x $build_sandbox/.singularity.d/runscript;
-
 
 ################################################################################
 ### SINGULARITY ENVIRONMENT ####################################################
 ################################################################################
 
 echo "(5/10) Setting ENV variables..."
+
+# First add templates for actions and env
+cp -R /scripts/env $build_sandbox/.singularity.d/
+cp -R /scripts/actions $build_sandbox/.singularity.d/
+
+# Then customize by adding Docker variables
 docker run --rm --entrypoint="/usr/bin/env" $image > $TMPDIR/docker_environment
 # do not include HOME and HOSTNAME - they mess with local config
 sed -i '/^HOME/d' $TMPDIR/docker_environment
@@ -283,7 +286,6 @@ cp $TMPDIR/docker_environment $build_sandbox/.singularity.d/env/10-docker.sh
 chmod +x $build_sandbox/.singularity.d/env/10-docker.sh;
 rm -rf $TMPDIR
 
-
 ################################################################################
 ### Permissions ################################################################
 ################################################################################
@@ -295,6 +297,7 @@ if [ "${mount_points}" ] ; then
 else
     echo "(6/10) Skipping mount points..."
 fi 
+
 
 # making sure that any user can read and execute everything in the container
 echo "(7/10) Fixing permissions..."
