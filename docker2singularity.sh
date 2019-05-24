@@ -244,7 +244,7 @@ function shell_escape () {
 CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image | shell_escape)
 ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $image | shell_escape)
 
-echo '#!/bin/sh -c' > $build_sandbox/.singularity.d/runscript
+echo '#!/bin/sh' > $build_sandbox/.singularity.d/runscript
 
 # Take working directory into account
 WORKINGDIR=$(docker inspect --format='{{json .Config.WorkingDir}}' $image)
