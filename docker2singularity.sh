@@ -152,12 +152,13 @@ if [[ $WORKINGDIR != '""' ]]; then
     echo cd $WORKINGDIR >> $TMPDIR/singularity;
 fi
 
-if [ -n "$ENTRYPOINT" ]; then
+# First preference goes to both entrypoint / cmd, then individual
+if [ -n "$ENTRYPOINT" ] && [ -n "$CMD" ]; then
+    echo exec "$ENTRYPOINT" "$CMD" '"$@"' >> $TMPDIR/singularity;
+elif [ -n "$ENTRYPOINT" ]; then
     echo exec "$ENTRYPOINT" '"$@"' >> $TMPDIR/singularity;
-else
-    if [ -n "$CMD" ]; then
-        echo exec "$CMD" '"$@"' >> $TMPDIR/singularity;
-    fi
+elif [ -n "$CMD" ]; then
+    echo exec "$CMD" '"$@"' >> $TMPDIR/singularity;
 fi
 
 chmod +x $TMPDIR/singularity
@@ -197,10 +198,10 @@ echo $buildname
 if [[ $buildname =~ Buildroot|Alpine ]] ; then
     # we're running on a Builroot container and need to use Busybox's find
     echo "We're running on BusyBox/Buildroot"
-    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -type f -or -type d -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
+    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -type f -or -type d -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;" || true
 else
     echo "We're not running on BusyBox/Buildroot"
-    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -executable -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
+    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -executable -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;" || true
 fi
 
 echo "(8/9) Stopping and removing the container..."
