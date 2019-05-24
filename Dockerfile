@@ -1,4 +1,4 @@
-FROM docker:1.13
+FROM docker:18.06
 
 RUN apk add --update automake libtool libarchive libarchive-dev python m4 autoconf alpine-sdk linux-headers && \
     wget -qO- https://github.com/singularityware/singularity/releases/download/2.6.0/singularity-2.6.0.tar.gz | tar zxv && \
