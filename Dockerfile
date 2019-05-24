@@ -1,6 +1,6 @@
-FROM docker:1.13
+FROM docker:18.09
 
-RUN apk add --update automake libtool m4 autoconf alpine-sdk linux-headers && \
+RUN apk add --update automake libtool m4 autoconf alpine-sdk linux-headers python && \
     wget -qO- https://github.com/gmkurtzer/singularity/archive/2.1.2.tar.gz | tar zxv && \
     cd singularity-2.1.2 && ./autogen.sh && ./configure --prefix=/usr/local && make && make install && \
     cd ../ && rm -rf singularity-2.1.2 && \
