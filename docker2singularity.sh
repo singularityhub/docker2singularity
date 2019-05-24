@@ -112,7 +112,6 @@ echo "Size: $size MB for the singularity container"
 
 
 
-
 ################################################################################
 ### IMAGE CREATION #############################################################
 ################################################################################
@@ -137,32 +136,29 @@ chmod a+rw -R $TMPDIR
 ### SINGULARITY RUN SCRIPT #####################################################
 ################################################################################
 echo "(4/9) Adding run script..."
-CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image)
-if [[ $CMD != [* ]]; then
-    if [[ $CMD != "null" ]]; then
-        CMD="/bin/sh -c "$CMD
-    fi
+
+function shell_escape () {
+    python -c 'import json, pipes, sys; print " ".join(pipes.quote(a) for a in json.load(sys.stdin) or [])'
+}
+
+CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image | shell_escape)
+ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $image | shell_escape)
+
+echo '#!/bin/sh -e' > $TMPDIR/singularity
+
+# Take working directory into account
+WORKINGDIR=$(docker inspect --format='{{json .Config.WorkingDir}}' $image)
+if [[ $WORKINGDIR != '""' ]]; then
+    echo cd $WORKINGDIR >> $TMPDIR/singularity;
 fi
-# Remove quotes, commas, and braces
-CMD=`echo "${CMD//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,//g'`
 
-ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $image)
-if [[ $ENTRYPOINT != [* ]]; then
-    if [[ $ENTRYPOINT != "null" ]]; then
-        ENTRYPOINT="/bin/sh -c "$ENTRYPOINT
-    fi
-fi
-
-# Remove quotes, commas, and braces
-ENTRYPOINT=`echo "${ENTRYPOINT//\"/}" | sed 's/\[//g' | sed 's/\]//g' | sed 's/,/ /g'`
-
-echo '#!/bin/sh' > $TMPDIR/singularity
-if [[ $ENTRYPOINT != "null" ]]; then
-    echo $ENTRYPOINT '$@' >> $TMPDIR/singularity;
-else
-    if [[ $CMD != "null" ]]; then
-        echo $CMD '$@' >> $TMPDIR/singularity;
-    fi
+# First preference goes to both entrypoint / cmd, then individual
+if [ -n "$ENTRYPOINT" ] && [ -n "$CMD" ]; then
+    echo exec "$ENTRYPOINT" "$CMD" '"$@"' >> $TMPDIR/singularity;
+elif [ -n "$ENTRYPOINT" ]; then
+    echo exec "$ENTRYPOINT" '"$@"' >> $TMPDIR/singularity;
+elif [ -n "$CMD" ]; then
+    echo exec "$CMD" '"$@"' >> $TMPDIR/singularity;
 fi
 
 chmod +x $TMPDIR/singularity
@@ -172,7 +168,7 @@ singularity copy $new_container_name $TMPDIR/singularity /
 ### SINGULARITY ENVIRONMENT ####################################################
 ################################################################################
 echo "(5/9) Setting ENV variables..."
-docker run --rm --entrypoint="/usr/bin/env" $image > $TMPDIR/docker_environment
+docker run --rm --entrypoint="env" $image > $TMPDIR/docker_environment
 # don't include HOME and HOSTNAME - they mess with local config
 sed -i '/^HOME/d' $TMPDIR/docker_environment
 sed -i '/^HOSTNAME/d' $TMPDIR/docker_environment
@@ -199,15 +195,15 @@ fi
 # making sure that any user can read and execute everything in the container
 echo "(7/9) Fixing permissions..."
 singularity exec --writable --contain $new_container_name /bin/sh -c "find /* -maxdepth 0 -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+r -R '{}' \;"
-buildname=$(singularity exec --contain $new_container_name /bin/sh -c "head -n 1 /etc/issue")
+buildname=$(singularity exec --contain $new_container_name /bin/sh -c "if [ -f \"/etc\issue\" ]; then head -n 1 /etc/issue; fi")
 echo $buildname
 if [[ $buildname =~ Buildroot|Alpine ]] ; then
     # we're running on a Builroot container and need to use Busybox's find
     echo "We're running on BusyBox/Buildroot"
-    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -type f -or -type d -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
+    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -type f -or -type d -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;" || true
 else
     echo "We're not running on BusyBox/Buildroot"
-    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -executable -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;"
+    singularity exec --writable --contain $new_container_name /bin/sh -c "find / -executable -perm -u+x,o-x -not -path '/dev*' -not -path '/proc*' -not -path '/sys*' -exec chmod a+x '{}' \;" || true
 fi
 
 echo "(8/9) Stopping and removing the container..."
