@@ -146,8 +146,6 @@ workflows:
               ignore: 
                 - gh-pages
                 - /docs?/.*/
-            tags:
-              only: /.*/
 
       - update_cache:
           requires:
@@ -157,16 +155,9 @@ workflows:
               ignore: 
                 - gh-pages
                 - /docs?/.*/
-            tags:
-              only: /.*/
 
       # Upload the container to Docker Hub
       - deploy:
           requires:
             - build
             - update_cache
-          filters:
-            branches:
-              only: master
-            tags:
-              only: /.*/
