@@ -161,3 +161,10 @@ workflows:
           requires:
             - build
             - update_cache
+          filters:
+            branches:
+              only: 
+               - master
+               - /v-.*
+            tags:
+              only: /.*/
