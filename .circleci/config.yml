@@ -165,6 +165,5 @@ workflows:
             branches:
               only: 
                - master
-               - v*
-            tags:
-              only: /.*/
+               - /^v.*/
+
