@@ -1,4 +1,4 @@
-FROM golang:1.12.5-alpine3.9 as base
+FROM golang:1.12.7-alpine3.10 as base
 
 ################################################################################
 #
@@ -19,12 +19,12 @@ FROM golang:1.12.5-alpine3.9 as base
 #
 ################################################################################
 
-FROM docker:18.09 as builder
+FROM docker:18.09.8 as builder
 COPY --from=base /go /go
 COPY --from=base /usr/local/go /usr/local/go
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-ENV GOLANG_VERSION 1.12.5
+ENV GOLANG_VERSION 1.12.7
 
 RUN apk update && \
     apk add --virtual automake build-base linux-headers libffi-dev
@@ -44,10 +44,10 @@ RUN mkdir -p /usr/local/var/singularity/mnt && \
 # See https://docs.docker.com/develop/develop-images/multistage-build/
 # for more information on multi-stage builds.
 
-FROM alpine:3.9
+FROM docker:18.09.8
 LABEL Maintainer vsochat@stanford.edu
 COPY --from=builder /usr/local/singularity /usr/local/singularity
-RUN apk add --no-cache ca-certificates libseccomp squashfs-tools
+RUN apk add --no-cache ca-certificates libseccomp squashfs-tools bash python rsync
 ENV PATH="/usr/local/singularity/bin:$PATH"
 
 ADD docker2singularity.sh /docker2singularity.sh
