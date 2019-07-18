@@ -1,7 +1,6 @@
 # `docker2singularity`
 
-
-<img src="https://camo.githubusercontent.com/49f33b2464042e323b43dfb587323f80d2329840/68747470733a2f2f7777772e73796c6162732e696f2f6775696465732f322e352e312f757365722d67756964652f5f7374617469632f6c6f676f2e706e67" alt="https://www.sylabs.io/guides/2.5.1/user-guide/_static/logo.png" data-canonical-src="https://www.sylabs.io/guides/2.5.1/user-guide/_static/logo.png" width="200" height="200">
+<img src="img/logo.png" alt="https://www.sylabs.io/guides/latest/user-guide" data-canonical-src="https://www.sylabs.io/guides/latest/user-guide" width="200" height="200">
 
 [![CircleCI](https://circleci.com/gh/singularityware/docker2singularity.svg?style=svg)](https://circleci.com/gh/singularityware/docker2singularity)
 
