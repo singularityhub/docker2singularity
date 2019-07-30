@@ -25,7 +25,6 @@ OPTIONS:
               -w: non-production writable image (ext3)         
 
               Default is squashfs (recommended)
-
 ```
 
 ### Options
