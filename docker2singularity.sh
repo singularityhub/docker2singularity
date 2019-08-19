@@ -270,8 +270,11 @@ chmod +x $build_sandbox/.singularity.d/runscript;
 echo "(5/10) Setting ENV variables..."
 
 # First add templates for actions and env
-cp -R /scripts/env $build_sandbox/.singularity.d/
-cp -R /scripts/actions $build_sandbox/.singularity.d/
+## Removed to avoid permissions issue with scripts (see #66)
+## cp -R /scripts/env $build_sandbox/.singularity.d/
+## cp -R /scripts/actions $build_sandbox/.singularity.d/
+# Create env scripts directory
+mkdir $build_sandbox/.singularity.d/env; chmod 755 $build_sandbox/.singularity.d/env
 
 # Then customize by adding Docker variables
 docker run --rm --entrypoint="/usr/bin/env" $image > $TMPDIR/docker_environment
