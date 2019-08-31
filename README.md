@@ -55,7 +55,7 @@ If you want a legacy version, see the following other branches:
  - [v2.5](https://github.com/singularityware/docker2singularity/tree/v2.5): Version 2.5.1 of Singularity. Same as 2.4 but with many bug fixes.
  - [v2.6](https://github.com/singularityware/docker2singularity/tree/v2.6): Version 2.6 of Singularity.
 
-Intermediate versions built on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/tags/). A tag with prefix `v` corresponds to a release of the Singularity software, while the others are in reference to releases of Docker.
+Intermediate versions built on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/tags/). A tag with prefix `v` corresponds to a release of the Singularity software, while the others are in reference to releases of Docker. Previously used [scripts](https://github.com/singularityware/docker2singularity/tree/master/scripts), including environment and action files, are provided in this repository for reference.
 
 ## Requirements
 
@@ -152,7 +152,6 @@ singularityware/docker2singularity \
 $ ls /tmp/test/
 meatballs.simg
 ```
-
 
 ### Inspect Your Image
 New with `docker2singularity` 2.4, the labels for the container are available with `inspect`:
