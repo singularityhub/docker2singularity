@@ -153,7 +153,6 @@ $ ls /tmp/test/
 meatballs.simg
 ```
 
-
 ### Inspect Your Image
 New with `docker2singularity` 2.4, the labels for the container are available with `inspect`:
 
