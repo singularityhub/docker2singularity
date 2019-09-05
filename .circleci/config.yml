@@ -6,7 +6,6 @@
 #
 # CONTAINER_NAME
 # DOCKER_USER
-# DOCKER_EMAIL
 
 ################################################################################
 # Functions
@@ -19,7 +18,7 @@ defaults: &defaults
     - image: docker:18.01.0-ce-git
   working_directory: /tmp/src
   environment:
-    - CONTAINER_NAME: singularityware/docker2singularity
+    - CONTAINER_NAME: quay.io/singularity/docker2singularity
 
 # Installation
 
@@ -40,7 +39,6 @@ dockerload: &dockerload
           pigz -d --stdout /tmp/cache/container.tar.gz | docker load
       fi
       
-
 dockersave: &dockersave
     name: Docker Save
     no_output_timeout: 40m
@@ -60,7 +58,7 @@ dockerdeploy: &dockerdeploy
       DOCKER_TAG="v$(cat VERSION)"
       echo "Container name set to ${CONTAINER_NAME}:${DOCKER_TAG}"
       if [[ -n "$DOCKER_PASS" ]]; then
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}" quay.io
             docker push ${CONTAINER_NAME}:${DOCKER_TAG}
             echo "Tagging latest image..."
             docker tag ${CONTAINER_NAME}:${DOCKER_TAG} ${CONTAINER_NAME}:latest
