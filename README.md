@@ -2,7 +2,7 @@
 
 <img src="img/logo.png" alt="https://www.sylabs.io/guides/latest/user-guide" data-canonical-src="https://www.sylabs.io/guides/latest/user-guide" width="200" height="200">
 
-[![CircleCI](https://circleci.com/gh/singularityware/docker2singularity.svg?style=svg)](https://circleci.com/gh/singularityware/docker2singularity)
+[![CircleCI](https://circleci.com/gh/singularityhub/docker2singularity.svg?style=svg)](https://circleci.com/gh/singularityhub/docker2singularity)
 
 Are you developing Docker images and you would like to run them on an HPC cluster 
 supporting [Singularity](https://www.sylabs.io/guides/2.5.1/user-guide/introduction.html)? 
@@ -15,7 +15,7 @@ The containers are also available for you on [Docker Hub](https://hub.docker.com
 ## Usage
 
 ```bash
-docker run singularityware/docker2singularity
+$ docker run quay.io/singularity/docker2singularity
 USAGE: docker2singularity [-m "/mount_point1 /mount_point2"] [options] docker_image_name
 OPTIONS:
 
@@ -31,7 +31,7 @@ OPTIONS:
 
 **Image Format**
 
- - `squashfs` (no arguments specified) gives you a squashfs (`*.simg`) image. This is a compressed, reliable, and read only format that is recommended for production images. Squashfs support was added to Singularity proper in [January of 2017](https://github.com/singularityware/singularity/commit/0cf00d1251ff276d5b9b7a0e4eadb783a45a6b65#diff-8405d9d311d83f009adff55c3deb112c) and thus available as early as the 2.2.1 release.
+ - `squashfs` (no arguments specified) gives you a squashfs (`*.simg`) image. This is a compressed, reliable, and read only format that is recommended for production images. Squashfs support was added to Singularity proper in [January of 2017](https://github.com/sylabs/singularity/commit/0cf00d1251ff276d5b9b7a0e4eadb783a45a6b65#diff-8405d9d311d83f009adff55c3deb112c) and thus available as early as the 2.2.1 release.
  - `sandbox` (`-f`) builds your image into a sandbox **folder**. This is ideal for development, as it will produce a working image in a folder on your system.
  - `ext3` (`-w`) builds an older format (ext3) image (`*.img`). This format is not recommended for production images as we have observed degradation of the images over time, and they tend to be upwards of 1.5x to 2x the size of squashfs.
 
@@ -50,12 +50,18 @@ The last argument (without a letter) is the name of the docker image, as you wou
 
 If you want a legacy version, see the following other branches:
 
- - [v2.3](https://github.com/singularityware/docker2singularity/tree/v2.3): Version 2.3 of Singularity. The image format is ext3.
- - [v2.4](https://github.com/singularityware/docker2singularity/tree/v2.4): Version 2.4 of Singularity. The default image format is squashfs.
- - [v2.5](https://github.com/singularityware/docker2singularity/tree/v2.5): Version 2.5.1 of Singularity. Same as 2.4 but with many bug fixes.
- - [v2.6](https://github.com/singularityware/docker2singularity/tree/v2.6): Version 2.6 of Singularity.
+ - [v3.4.0](https://github.com/singularityhub/docker2singularity/tree/v3.3.0): Version 3.4.0 of Singularity.
+ - [v3.3.0](https://github.com/singularityhub/docker2singularity/tree/v3.3.0): Version 3.3.0 of Singularity.
+ - [v3.2.1](https://github.com/singularityhub/docker2singularity/tree/v3.2.1): Version 3.2.1 of Singularity.
+ - [v3.1](https://github.com/singularityhub/docker2singularity/tree/v3.1): Version 3.1 of Singularity.
+ - [v2.6](https://github.com/singularityhub/docker2singularity/tree/v2.6): Version 2.6 of Singularity.
+ - [v2.5](https://github.com/singularityhub/docker2singularity/tree/v2.5): Version 2.5.1 of Singularity. Same as 2.4 but 
+ - [v2.4](https://github.com/singularityhub/docker2singularity/tree/v2.4): Version 2.4 of Singularity. The default image format is squashfs.
+ - [v2.3](https://github.com/singularityhub/docker2singularity/tree/v2.3): Version 2.3 of Singularity. The image format is ext3.
+with many bug fixes.
 
-Intermediate versions built on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/tags/). A tag with prefix `v` corresponds to a release of the Singularity software, while the others are in reference to releases of Docker. Previously used [scripts](https://github.com/singularityware/docker2singularity/tree/master/scripts), including environment and action files, are provided in this repository for reference.
+Containers were previous built on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/tags/) and
+now are provided on [quay.io](https://quay.io/repository/singularity/docker2singularity?tab=tags). A tag with prefix `v` corresponds to a release of the Singularity software, while the others are in reference to releases of Docker. Previously used [scripts](https://github.com/singularityhub/docker2singularity/tree/master/scripts), including environment and action files, are provided in this repository for reference.
 
 ## Requirements
 
@@ -80,7 +86,7 @@ And here is the command to run. Notice that I am mounting the path `/tmp/test` t
 $ docker run -v /var/run/docker.sock:/var/run/docker.sock \
 -v /tmp/test:/output \
 --privileged -t --rm \
-singularityware/docker2singularity \
+quay.io/singularity/docker2singularity \
 ubuntu:14.04
 
 Image Format: squashfs
@@ -144,7 +150,7 @@ Added for version 2.5.1, you can specify the name of your container with the `-n
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
 -v /tmp/test:/output \
 --privileged -t --rm \
-singularityware/docker2singularity \
+quay.io/singularity/docker2singularity \
 --name meatballs ubuntu:14.04
 
 ...
@@ -193,7 +199,7 @@ A sandbox image is a folder that is ideal for development. You can view it on yo
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
 -v /host/path/change/me:/output \
 --privileged -t --rm \
-singularityware/docker2singularity \
+quay.io/singularity/docker2singularity \
 -f \
 ubuntu:14.04
 ```
@@ -210,7 +216,7 @@ You can build a legacy ext3 image (with `--writable`) with the `-w` flag. This i
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
 -v /host/path/change/me:/output \
 --privileged -t --rm \
-singularityware/docker2singularity \
+quay.io/singularity/docker2singularity \
 -w \
 ubuntu:14.04
 ```
@@ -222,7 +228,7 @@ sudo singularity build ext3.img production.simg
 
 ### Contributed Examples
 
-The following are a list of brief examples and tutorials generated by the Singularity community for using **docker2singularity**. If you have an example of your own, please [let us know](https://www.github.com/singularityware/docker2singularity/issues)!
+The following are a list of brief examples and tutorials generated by the Singularity community for using **docker2singularity**. If you have an example of your own, please [let us know](https://www.github.com/singularityhub/docker2singularity/issues)!
 
  - [docker2singularity-demo](https://github.com/stevekm/docker2singularity-demo): an example of using docker2singularity on MacOS and using Vagrant to test the output Singularity image, complete with notes and a nice Makefile.
 
@@ -267,7 +273,7 @@ If you are getting `WARNING: Non existant bind point (directory) in container: '
      -v /var/run/docker.sock:/var/run/docker.sock \
      -v D:\host\path\where\to\output\singularity\image:/output \
      --privileged -t --rm \
-     singularityware/docker2singularity \            
+     quay.io/singularity/docker2singularity \            
      -m "/shared_fs /custom_mountpoint2" \
      ubuntu:14.04
 ```
@@ -281,7 +287,7 @@ to be correct.
 
 ```bash
 VERSION=$(cat VERSION)
-image="singularityware/docker2singularity:${VERSION}"
+image="quay.io/singularity/docker2singularity:${VERSION}"
 docker build -t ${image} .
 ```
 
@@ -308,5 +314,5 @@ Don't forget to read the [CONTRIBUTING.md](.github/CONTRIBUTING.md) along with t
 
 This work is heavily based on the `docker2singularity` work done by [vsoch](https://github.com/vsoch) 
 and [gmkurtzer](https://github.com/gmkurtzer). The original record of the work can be read about
-in [this commit](https://github.com/singularityware/docker2singularity/commit/d174cadefd90f77f302f4bef5a8cd089eb2da2e4).
+in [this commit](https://github.com/singularityhub/docker2singularity/commit/d174cadefd90f77f302f4bef5a8cd089eb2da2e4).
 Thank you kindly to all the [contributors](.github/AUTHORS.md), and please open an issue if you need help.
