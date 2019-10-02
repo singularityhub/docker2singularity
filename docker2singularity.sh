@@ -81,12 +81,10 @@ while true; do
         -f|--folder)
             shift
             image_format="sandbox"
-            shift
         ;;
         -w|--writable)
             shift
             image_format="writable"
-            shift
         ;;
         :) printf "missing argument for -%s\n" "$option" >&2
            usage
@@ -107,7 +105,7 @@ while true; do
     esac
 done
 
-image=$1
+image=${1}
 
 echo ""
 echo "Image Format: ${image_format}"
