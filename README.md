@@ -20,11 +20,13 @@ USAGE: docker2singularity [-m "/mount_point1 /mount_point2"] [options] docker_im
 OPTIONS:
 
           Image Format
-              -f: build development sandbox (folder)
-              -w: non-production writable image (ext3)         
-
-              Default is squashfs (recommended)
-
+              --folder   -f   build development sandbox (folder)
+              --option   -o   add a custom option to build (-o --fakeroot or -option 'section post' )
+              --writable -w   non-production writable image (ext3)         
+                              Default is squashfs (recommended) (deprecated)
+              --name     -n   provide basename for the container (default based on URI)
+              --mount    -m   provide list of custom mount points (in quotes!)
+              --help     -h   show this help and exit
 ```
 
 ### Options
@@ -40,6 +42,17 @@ Note that you are able to convert easily from a folder or ext3 image using Singu
 **Mount Points**
 
  - `-m` specify one or more mount points to create in the image.
+
+**Options**
+
+If you look at `singularity build --help` there are a variety of options available.
+You can specify some custom option to the command using the `--option` flag. Make sure
+that each option that you specify is captured as a single string. E.g.,:
+
+```bash
+--option --fakeroot 
+--option '--section post'
+```
 
 **Image Name**
 

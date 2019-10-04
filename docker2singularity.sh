@@ -44,8 +44,9 @@ function usage() {
 
           Image Format
               --folder   -f   build development sandbox (folder)
+              --option   -o   add a custom option to build (-o --fakeroot or -option 'section post' )
               --writable -w   non-production writable image (ext3)         
-                              Default is squashfs (recommended)
+                              Default is squashfs (recommended) (deprecated)
               --name     -n   provide basename for the container (default based on URI)
               --mount    -m   provide list of custom mount points (in quotes!)
               --help     -h   show this help and exit
@@ -61,6 +62,7 @@ fi
 mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /corral-tacc /beegfs /share/PI /extra /data /oak"
 image_format="squashfs"
 new_container_name=""
+options=""
 
 while true; do
     case ${1:-} in
@@ -78,15 +80,18 @@ while true; do
             mount_points="${1:-}"
             shift
         ;;
+        -o|--option)
+            shift
+            options="${1:-} ${options}"
+            shift
+        ;;
         -f|--folder)
             shift
             image_format="sandbox"
-            shift
         ;;
         -w|--writable)
             shift
             image_format="writable"
-            shift
         ;;
         :) printf "missing argument for -%s\n" "$option" >&2
            usage
@@ -107,7 +112,7 @@ while true; do
     esac
 done
 
-image=$1
+image=${1}
 
 echo ""
 echo "Image Format: ${image_format}"
@@ -313,11 +318,11 @@ docker rm $container_id >> /dev/null
 # Build a final image from the sandbox
 echo "(9/10) Building ${image_format} container..."
 if [ "$image_format" == "squashfs" ]; then
-    new_container_name=${new_container_name}.simg
-    singularity build ${new_container_name} $build_sandbox
+    new_container_name=${new_container_name}.sif
+    singularity build ${options} ${new_container_name} $build_sandbox
 elif [ "$image_format" == "writable" ]; then
-    new_container_name=${new_container_name}.img    
-    singularity build --writable ${new_container_name} $build_sandbox
+    new_container_name=${new_container_name}.simg    
+    singularity build ${options} --writable ${new_container_name} $build_sandbox
 else
     mv $build_sandbox $new_container_name
 fi
