@@ -114,7 +114,6 @@ done
 
 image=${1}
 
-exit 0
 echo ""
 echo "Image Format: ${image_format}"
 echo "Docker Image: ${image}"
