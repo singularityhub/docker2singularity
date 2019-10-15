@@ -1,4 +1,4 @@
-FROM golang:1.12.7-alpine3.10 as base
+FROM golang:1.13-alpine3.10 as base
 
 ################################################################################
 #
@@ -34,7 +34,7 @@ RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linu
 RUN mkdir -p /usr/local/var/singularity/mnt && \
     mkdir -p $GOPATH/src/github.com/sylabs && \
     cd $GOPATH/src/github.com/sylabs && \
-    wget -qO- https://github.com/sylabs/singularity/releases/download/v3.4.1/singularity-3.4.1.tar.gz | \
+    wget -qO- https://github.com/sylabs/singularity/releases/download/v3.4.2/singularity-3.4.2.tar.gz | \
     tar xzv && \
     cd singularity && \
     ./mconfig -p /usr/local/singularity && \
