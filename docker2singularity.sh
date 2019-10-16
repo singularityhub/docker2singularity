@@ -258,12 +258,15 @@ if [[ $WORKINGDIR != '""' ]]; then
 fi
 
 # First preference goes to both entrypoint / cmd, then individual
-if [ -n "$ENTRYPOINT" ] && [ -n "$CMD" ]; then
-    echo exec "$ENTRYPOINT" "$CMD" '"$@"' >> $build_sandbox/.singularity.d/runscript;
+if [ -n "$CMD" ]; then
+    echo 'if [ $# = 0 ]; then' >> $build_sandbox/.singularity.d/runscript
+    # Only add the entrypoint if it's not null
+    echo \ \ exec ${ENTRYPOINT:+"$ENTRYPOINT"} "$CMD" >> $build_sandbox/.singularity.d/runscript;
+    echo "else" >> $build_sandbox/.singularity.d/runscript
+    echo \ \ exec ${ENTRYPOINT:+"$ENTRYPOINT"} '"$@"' >> $build_sandbox/.singularity.d/runscript;
+    echo "fi" >> $build_sandbox/.singularity.d/runscript
 elif [ -n "$ENTRYPOINT" ]; then
     echo exec "$ENTRYPOINT" '"$@"' >> $build_sandbox/.singularity.d/runscript;
-elif [ -n "$CMD" ]; then
-    echo exec "$CMD" '"$@"' >> $build_sandbox/.singularity.d/runscript;
 fi
 
 chmod +x $build_sandbox/.singularity.d/runscript;
