@@ -188,9 +188,9 @@ fi
 build_sandbox="${new_container_name}.build"
 
 
-echo "(1/10) Creating a build sandbox..."
+echo "(1/11) Creating a build sandbox..."
 mkdir -p ${build_sandbox}
-echo "(2/10) Exporting filesystem..."
+echo "(2/11) Exporting filesystem..."
 docker export $container_id >> $build_sandbox.tar
 tar -C $build_sandbox -xf $build_sandbox.tar
 docker inspect $container_id >> $build_sandbox/singularity.json
@@ -205,7 +205,7 @@ SINGULARITY_MESSAGELEVEL=0
 export SINGULARITY_MESSAGELEVEL
 
 # For docker2singularity, installation is at /usr/local
-echo "(3/10) Creating labels..."
+echo "(3/11) Creating labels..."
 LABELS=$(docker inspect --format='{{json .Config.Labels}}' $image)
 LABELFILE=$(printf "%q" "$build_sandbox/.singularity.d/labels.json")
 ADD_LABEL="/addLabel.py -f --file ${LABELFILE}"
@@ -240,7 +240,7 @@ unset SINGULARITY_MESSAGELEVEL
 ################################################################################
 ### SINGULARITY RUN SCRIPT #####################################################
 ################################################################################
-echo "(4/10) Adding run script..."
+echo "(4/11) Adding run script..."
 
 function shell_escape () {
     python -c 'import json, pipes, sys; print " ".join(pipes.quote(a) for a in json.load(sys.stdin) or [])'
@@ -272,7 +272,7 @@ chmod +x $build_sandbox/.singularity.d/runscript;
 ### SINGULARITY ENVIRONMENT ####################################################
 ################################################################################
 
-echo "(5/10) Setting ENV variables..."
+echo "(5/11) Setting ENV variables..."
 
 # Removed copying of template files to avoid scripts permissions issue (see #66)
 # Create env scripts directory
@@ -296,27 +296,32 @@ rm -rf $TMPDIR
 ### Permissions ################################################################
 ################################################################################
 if [ "${mount_points}" ] ; then
-    echo "(6/10) Adding mount points..."
+    echo "(6/11) Adding mount points..."
     for mount_point in ${mount_points}; do
         mkdir -p "${build_sandbox}/${mount_point}"
     done
 else
-    echo "(6/10) Skipping mount points..."
+    echo "(6/11) Skipping mount points..."
 fi 
 
 
 # making sure that any user can read and execute everything in the container
-echo "(7/10) Fixing permissions..."
+echo "(7/11) Fixing permissions..."
 
 find ${build_sandbox}/* -maxdepth 0 -not -path '${build_sandbox}/dev*' -not -path '${build_sandbox}/proc*' -not -path '${build_sandbox}/sys*' -exec chmod a+r -R '{}' \;
 find ${build_sandbox}/* -type f -or -type d -perm -u+x,o-x -not -path '${build_sandbox}/dev*' -not -path '${build_sandbox}/proc*' -not -path '${build_sandbox}/sys*' -exec chmod a+x '{}' \;
 
-echo "(8/10) Stopping and removing the container..."
+echo "(8/11) Stopping and removing the container..."
 docker stop $container_id >> /dev/null
 docker rm $container_id >> /dev/null
 
+echo "(9/11) Custom script..."
+if [ -r /custom/tosingularity ]; then
+  source /custom/tosingularity
+fi
+
 # Build a final image from the sandbox
-echo "(9/10) Building ${image_format} container..."
+echo "(10/11) Building ${image_format} container..."
 if [ "$image_format" == "squashfs" ]; then
     new_container_name=${new_container_name}.sif
     singularity build ${options} ${new_container_name} $build_sandbox
@@ -327,7 +332,7 @@ else
     mv $build_sandbox $new_container_name
 fi
 
-echo "(10/10) Moving the image to the output folder..."
+echo "(11/11) Moving the image to the output folder..."
 finalsize=`du -shm $new_container_name | cut -f1`
 rsync --info=progress2 -a $new_container_name /output/
 echo "Final Size: ${finalsize}MB"

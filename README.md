@@ -59,6 +59,9 @@ that each option that you specify is captured as a single string. E.g.,:
 
 The last argument (without a letter) is the name of the docker image, as you would specify to run with Docker (e.g., `docker run ubuntu:latest`)
 
+**Custom Install Script**
+
+You can add your own custom step 9 to customize the final image by mounting a bash script to `/custom/tosingularity`. The script will be sourced, so you'll have access to all the `docker2singularity.sh` script variables.
 
 ## Legacy
 
@@ -239,6 +242,27 @@ You can also use `--writable` and convert an ext3 image into a production image:
 
 ```bash
 sudo singularity build ext3.img production.simg
+```
+
+### Custom Script
+
+Here is an example of a custom script, where the `runscript` is copied to `startscript` to support `singularity instance start`:
+
+
+```bash
+# /home/me/custom_script.sh
+
+# Copy the run script to the start script, so that instance starts
+cp "${build_sandbox}/.singularity.d/runscript" "${build_sandbox}/.singularity.d/startscript"
+```
+
+```bash
+docker run -v /var/run/docker.sock:/var/run/docker.sock \
+           -v /tmp/test:/output \
+           -v /home/me/custom_script.sh:/custom/tosingularity \
+           --privileged -t --rm \
+           quay.io/singularity/docker2singularity \
+           ubuntu:14.04
 ```
 
 ### Contributed Examples
