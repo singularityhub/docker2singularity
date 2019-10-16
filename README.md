@@ -70,10 +70,9 @@ If you want a legacy version, see the following other branches:
  - [v3.2.1](https://github.com/singularityhub/docker2singularity/tree/v3.2.1): Version 3.2.1 of Singularity.
  - [v3.1](https://github.com/singularityhub/docker2singularity/tree/v3.1): Version 3.1 of Singularity.
  - [v2.6](https://github.com/singularityhub/docker2singularity/tree/v2.6): Version 2.6 of Singularity.
- - [v2.5](https://github.com/singularityhub/docker2singularity/tree/v2.5): Version 2.5.1 of Singularity. Same as 2.4 but 
+ - [v2.5](https://github.com/singularityhub/docker2singularity/tree/v2.5): Version 2.5.1 of Singularity. Same as 2.4 but with many bug fixes.
  - [v2.4](https://github.com/singularityhub/docker2singularity/tree/v2.4): Version 2.4 of Singularity. The default image format is squashfs.
  - [v2.3](https://github.com/singularityhub/docker2singularity/tree/v2.3): Version 2.3 of Singularity. The image format is ext3.
-with many bug fixes.
 
 Containers were previous built on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/tags/) and
 now are provided on [quay.io](https://quay.io/repository/singularity/docker2singularity?tab=tags). A tag with prefix `v` corresponds to a release of the Singularity software, while the others are in reference to releases of Docker. Previously used [scripts](https://github.com/singularityhub/docker2singularity/tree/master/scripts), including environment and action files, are provided in this repository for reference.
