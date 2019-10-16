@@ -49,6 +49,7 @@ function usage() {
                               Default is squashfs (recommended) (deprecated)
               --name     -n   provide basename for the container (default based on URI)
               --mount    -m   provide list of custom mount points (in quotes!)
+              --custom   -c   set custom script path for step 9 (default /custom/tosingularity)
               --help     -h   show this help and exit
               "
 }
@@ -62,6 +63,7 @@ fi
 mount_points="/oasis /projects /scratch /local-scratch /work /home1 /corral-repl /corral-tacc /beegfs /share/PI /extra /data /oak"
 image_format="squashfs"
 new_container_name=""
+custom_script=/custom/tosingularity
 options=""
 
 while true; do
@@ -93,6 +95,10 @@ while true; do
             shift
             image_format="writable"
         ;;
+        -c|--custom)
+            shift
+            custom_script="${1:-}"
+            shift
         :) printf "missing argument for -%s\n" "$option" >&2
            usage
            exit 1
@@ -316,8 +322,8 @@ docker stop $container_id >> /dev/null
 docker rm $container_id >> /dev/null
 
 echo "(9/11) Custom script..."
-if [ -r /custom/tosingularity ]; then
-  source /custom/tosingularity
+if [ -r "${custom_script}" ]; then
+  source "${custom_script}"
 fi
 
 # Build a final image from the sandbox

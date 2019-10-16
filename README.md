@@ -23,10 +23,11 @@ OPTIONS:
           Image Format
               --folder   -f   build development sandbox (folder)
               --option   -o   add a custom option to build (-o --fakeroot or -option 'section post' )
-              --writable -w   non-production writable image (ext3)         
+              --writable -w   non-production writable image (ext3)
                               Default is squashfs (recommended) (deprecated)
               --name     -n   provide basename for the container (default based on URI)
               --mount    -m   provide list of custom mount points (in quotes!)
+              --custom   -c   set custom script path for step 9 (default /custom/tosingularity)
               --help     -h   show this help and exit
 ```
 
