@@ -325,6 +325,9 @@ echo "(9/11) Custom script..."
 if [ -r "${custom_script}" ]; then
   source "${custom_script}"
 fi
+if [ -r "${build_sandbox}/${custom_script}" ]; then
+  source "${build_sandbox}/${custom_script}"
+fi
 
 # Build a final image from the sandbox
 echo "(10/11) Building ${image_format} container..."

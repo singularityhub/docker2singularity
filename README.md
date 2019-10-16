@@ -62,7 +62,7 @@ The last argument (without a letter) is the name of the docker image, as you wou
 
 **Custom Install Script**
 
-You can add your own custom step 9 to customize the final image by mounting a bash script to `/custom/tosingularity`. The script will be sourced, so you'll have access to all the `docker2singularity.sh` script variables.
+You can add your own custom step 9 to customize the final image by mounting a bash script to `/custom/tosingularity` (or a path specified with `-c`/`--custom`). The docker image will be searched for the same path and used if found there. The script will be sourced, so you'll have access to all the `docker2singularity.sh` script variables.
 
 ## Legacy
 
