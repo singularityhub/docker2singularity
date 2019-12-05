@@ -34,7 +34,7 @@ RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linu
 RUN mkdir -p /usr/local/var/singularity/mnt && \
     mkdir -p $GOPATH/src/github.com/sylabs && \
     cd $GOPATH/src/github.com/sylabs && \
-    wget -qO- https://github.com/sylabs/singularity/releases/download/v3.5.0/singularity-3.5.0.tar.gz | \
+    wget -qO- https://github.com/sylabs/singularity/releases/download/v3.5.1/singularity-3.5.1.tar.gz | \
     tar xzv && \
     cd singularity && \
     ./mconfig -p /usr/local/singularity && \
