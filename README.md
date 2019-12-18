@@ -9,7 +9,7 @@ supporting [Singularity](https://www.sylabs.io/guides/latest/user-guide/)?
 Are you working on Mac or Windows with no easy access to a Linux machine? If the pull, 
 build, and general commands to work with docker images provided by Singularity
 natively do not fit your needs, `docker2singularity` is an alternative way to generate Singularity images. 
-This particular branch is intended for Singularity 2.5.1, which gives you a selection of image formats to build.
+This particular branch is intended for Singularity 3.5.1, which gives you a selection of image formats to build.
 The containers are available to you on [quay.io](https://quay.io/repository/singularity/docker2singularity), a
 nd older versions also available for you on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/).
 
