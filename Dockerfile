@@ -31,7 +31,7 @@ RUN apk update && \
 RUN apk add --no-cache bash git openssh gcc squashfs-tools sudo libtool gawk ca-certificates libseccomp
 RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linux-dev python rsync cryptsetup
 
-ENV SINGULARITY_VERSION 3.7.1
+ENV SINGULARITY_VERSION 3.7.2
 RUN mkdir -p /usr/local/var/singularity/mnt && \
     mkdir -p $GOPATH/src/github.com/hpcng && \
     cd $GOPATH/src/github.com/hpcng && \
@@ -46,7 +46,7 @@ RUN mkdir -p /usr/local/var/singularity/mnt && \
 # for more information on multi-stage builds.
 
 FROM docker:18.09.8
-LABEL Maintainer vsochat@stanford.edu
+LABEL Maintainer @vsoch
 COPY --from=builder /usr/local/singularity /usr/local/singularity
 RUN apk add --no-cache ca-certificates libseccomp squashfs-tools bash python rsync
 ENV PATH="/usr/local/singularity/bin:$PATH"
