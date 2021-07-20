@@ -37,7 +37,7 @@ RUN mkdir -p /usr/local/var/singularity/mnt && \
     cd $GOPATH/src/github.com/sylabs && \
     wget -qO- https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-ce-${SINGULARITY_VERSION}.tar.gz | \
     tar xzv && \
-    cd singularity && \
+    cd singularity-ce-${SINGULARITY_VERSION} && \
     ./mconfig -p /usr/local/singularity && \
     make -C builddir && \
     make -C builddir install
