@@ -31,11 +31,11 @@ RUN apk update && \
 RUN apk add --no-cache bash git openssh gcc squashfs-tools sudo libtool gawk ca-certificates libseccomp
 RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linux-dev python rsync cryptsetup
 
-ENV SINGULARITY_VERSION 3.7.3
+ENV SINGULARITY_VERSION 3.7.4
 RUN mkdir -p /usr/local/var/singularity/mnt && \
-    mkdir -p $GOPATH/src/github.com/hpcng && \
-    cd $GOPATH/src/github.com/hpcng && \
-    wget -qO- https://github.com/hpcng/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-${SINGULARITY_VERSION}.tar.gz | \
+    mkdir -p $GOPATH/src/github.com/sylabs && \
+    cd $GOPATH/src/github.com/sylabs && \
+    wget -qO- https://github.com/sylabs/singularity/releases/download/v${SINGULARITY_VERSION}/singularity-${SINGULARITY_VERSION}.tar.gz | \
     tar xzv && \
     cd singularity && \
     ./mconfig -p /usr/local/singularity && \
