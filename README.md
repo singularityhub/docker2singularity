@@ -63,6 +63,7 @@ The last argument (without a letter) is the name of the docker image, as you wou
 
 If you want a legacy version, see the following other branches:
 
+ - [v3.8.1](https://github.com/singularityhub/docker2singularity/tree/v3.8.1): Version 3.8.1 of Singularity.
  - [v3.7.4](https://github.com/singularityhub/docker2singularity/tree/v3.7.4): Version 3.7.4 of Singularity.
  - [v3.7.3](https://github.com/singularityhub/docker2singularity/tree/v3.7.3): Version 3.7.3 of Singularity.
  - [v3.7.2](https://github.com/singularityhub/docker2singularity/tree/v3.7.2): Version 3.7.2 of Singularity.
