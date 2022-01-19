@@ -169,8 +169,8 @@ workflows:
           requires:
             - build
             - update_cache
-#          filters:
-#            branches:
-#              only: 
-#               - master
-#               - /^v.*/
+          filters:
+            branches:
+              only: 
+               - master
+               - /^v.*/
