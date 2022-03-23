@@ -1,4 +1,4 @@
-FROM golang:1.16.6-alpine as base
+FROM golang:1.17.8-alpine as base
 
 ################################################################################
 #
@@ -24,14 +24,14 @@ COPY --from=base /go /go
 COPY --from=base /usr/local/go /usr/local/go
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-ENV GOLANG_VERSION 1.16.6
+ENV GOLANG_VERSION 1.17.8
 
 RUN apk update && \
     apk add --virtual automake build-base linux-headers libffi-dev
 RUN apk add --no-cache bash git openssh gcc squashfs-tools sudo libtool gawk ca-certificates libseccomp
 RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linux-dev python rsync cryptsetup
 
-ENV SINGULARITY_VERSION 3.9.6
+ENV SINGULARITY_VERSION 3.9.8
 RUN mkdir -p /usr/local/var/singularity/mnt && \
     mkdir -p $GOPATH/src/github.com/sylabs && \
     cd $GOPATH/src/github.com/sylabs && \
