@@ -31,7 +31,7 @@ RUN apk update && \
 RUN apk add --no-cache bash git openssh gcc squashfs-tools sudo libtool gawk ca-certificates libseccomp libseccomp-dev
 RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linux-dev python rsync cryptsetup glib-dev
 
-ENV SINGULARITY_VERSION 3.10.0
+ENV SINGULARITY_VERSION 3.10.1
 RUN mkdir -p /usr/local/var/singularity/mnt && \
     mkdir -p $GOPATH/src/github.com/sylabs && \
     cd $GOPATH/src/github.com/sylabs && \
