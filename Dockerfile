@@ -1,8 +1,8 @@
-FROM golang:1.17.8-alpine as base
+FROM golang:1.18.10-alpine as base
 
 ################################################################################
 #
-# Copyright (C) 2019-2022 Vanessa Sochat.
+# Copyright (C) 2019-2023 Vanessa Sochat.
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License as published by
@@ -24,14 +24,14 @@ COPY --from=base /go /go
 COPY --from=base /usr/local/go /usr/local/go
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-ENV GOLANG_VERSION 1.17.8
+ENV GOLANG_VERSION 1.18.10
 
 RUN apk update && \
     apk add --virtual automake build-base linux-headers libffi-dev
 RUN apk add --no-cache bash git openssh gcc squashfs-tools sudo libtool gawk ca-certificates libseccomp libseccomp-dev
 RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linux-dev python rsync cryptsetup glib-dev
 
-ENV SINGULARITY_VERSION 3.10.5
+ENV SINGULARITY_VERSION 3.11.0
 RUN mkdir -p /usr/local/var/singularity/mnt && \
     mkdir -p $GOPATH/src/github.com/sylabs && \
     cd $GOPATH/src/github.com/sylabs && \
@@ -56,3 +56,4 @@ ADD addLabel.py /addLabel.py
 ADD scripts /scripts
 RUN chmod a+x docker2singularity.sh
 ENTRYPOINT ["docker-entrypoint.sh", "/docker2singularity.sh"]
+
