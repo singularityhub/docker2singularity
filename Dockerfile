@@ -19,7 +19,7 @@ FROM golang:1.21.3-alpine
 #
 ################################################################################
 
-FROM docker:18.09.8 as builder
+FROM docker:24.0.6-git as builder
 COPY --from=base /go /go
 COPY --from=base /usr/local/go /usr/local/go
 ENV GOPATH /go
