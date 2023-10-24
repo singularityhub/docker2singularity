@@ -29,7 +29,7 @@ ENV GOLANG_VERSION 1.21.3
 RUN apk update && \
     apk add --virtual .build-deps autoconf automake build-base linux-headers libffi-dev
 RUN apk add --no-cache bash git openssh gcc squashfs-tools sudo libtool gawk ca-certificates libseccomp libseccomp-dev
-RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linux-dev shadow-uidmap fuse3-dev python rsync cryptsetup glib-dev
+RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linux-dev shadow-uidmap fuse3-dev python3 rsync cryptsetup glib-dev
 
 ENV SINGULARITY_VERSION 4.0.1
 RUN mkdir -p /usr/local/var/singularity/mnt && \
