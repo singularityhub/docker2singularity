@@ -61,49 +61,8 @@ The last argument (without a letter) is the name of the docker image, as you wou
 
 ## Legacy
 
-If you want a legacy version, see the following other branches:
-
- - [v3.10.5](https://github.com/singularityhub/docker2singularity/tree/v3.10.5): Version 3.10.5 of Singularity.
- - [v3.10.3](https://github.com/singularityhub/docker2singularity/tree/v3.10.3): Version 3.10.3 of Singularity.
- - [v3.10.2](https://github.com/singularityhub/docker2singularity/tree/v3.10.2): Version 3.10.2 of Singularity.
- - [v3.10.1](https://github.com/singularityhub/docker2singularity/tree/v3.10.1): Version 3.10.1 of Singularity.
- - [v3.10.0](https://github.com/singularityhub/docker2singularity/tree/v3.10.0): Version 3.10.0 of Singularity.
- - [v3.9.9](https://github.com/singularityhub/docker2singularity/tree/v3.9.9): Version 3.9.9 of Singularity.
- - [v3.9.8](https://github.com/singularityhub/docker2singularity/tree/v3.9.8): Version 3.9.8 of Singularity.
- - [v3.9.7](https://github.com/singularityhub/docker2singularity/tree/v3.9.7): Version 3.9.7 of Singularity.
- - [v3.9.6](https://github.com/singularityhub/docker2singularity/tree/v3.9.6): Version 3.9.6 of Singularity.
- - [v3.9.5](https://github.com/singularityhub/docker2singularity/tree/v3.9.5): Version 3.9.5 of Singularity.
- - [v3.9.4](https://github.com/singularityhub/docker2singularity/tree/v3.9.4): Version 3.9.4 of Singularity.
- - [v3.9.3](https://github.com/singularityhub/docker2singularity/tree/v3.9.3): Version 3.9.3 of Singularity.
- - [v3.9.2](https://github.com/singularityhub/docker2singularity/tree/v3.9.2): Version 3.9.2 of Singularity.
- - [v3.9.1](https://github.com/singularityhub/docker2singularity/tree/v3.9.1): Version 3.9.1 of Singularity.
- - [v3.9.0](https://github.com/singularityhub/docker2singularity/tree/v3.9.0): Version 3.9.0 of Singularity.
- - [v3.8.4](https://github.com/singularityhub/docker2singularity/tree/v3.8.4): Version 3.8.4 of Singularity.
- - [v3.8.3](https://github.com/singularityhub/docker2singularity/tree/v3.8.3): Version 3.8.3 of Singularity.
- - [v3.8.2](https://github.com/singularityhub/docker2singularity/tree/v3.8.2): Version 3.8.2 of Singularity.
- - [v3.8.1](https://github.com/singularityhub/docker2singularity/tree/v3.8.1): Version 3.8.1 of Singularity.
- - [v3.7.4](https://github.com/singularityhub/docker2singularity/tree/v3.7.4): Version 3.7.4 of Singularity.
- - [v3.7.3](https://github.com/singularityhub/docker2singularity/tree/v3.7.3): Version 3.7.3 of Singularity.
- - [v3.7.2](https://github.com/singularityhub/docker2singularity/tree/v3.7.2): Version 3.7.2 of Singularity.
- - [v3.7.1](https://github.com/singularityhub/docker2singularity/tree/v3.7.1): Version 3.7.1 of Singularity.
- - [v3.7.0](https://github.com/singularityhub/docker2singularity/tree/v3.7.0): Version 3.7.0 of Singularity.
- - [v3.6.4](https://github.com/singularityhub/docker2singularity/tree/v3.6.4): Version 3.6.4 of Singularity.
- - [v3.6.2](https://github.com/singularityhub/docker2singularity/tree/v3.6.2): Version 3.6.2 of Singularity.
- - [v3.6.1](https://github.com/singularityhub/docker2singularity/tree/v3.6.1): Version 3.6.1 of Singularity.
- - [v3.6.0](https://github.com/singularityhub/docker2singularity/tree/v3.6.0): Version 3.6.0 of Singularity.
- - [v3.5.3](https://github.com/singularityhub/docker2singularity/tree/v3.5.3): Version 3.5.3 of Singularity.
- - [v3.5.1](https://github.com/singularityhub/docker2singularity/tree/v3.5.1): Version 3.5.1 of Singularity.
- - [v3.5.0](https://github.com/singularityhub/docker2singularity/tree/v3.5.0): Version 3.5.0 of Singularity.
- - [v3.4.2](https://github.com/singularityhub/docker2singularity/tree/v3.4.2): Version 3.4.2 of Singularity.
- - [v3.4.1](https://github.com/singularityhub/docker2singularity/tree/v3.4.1): Version 3.4.1 of Singularity.
- - [v3.4.0](https://github.com/singularityhub/docker2singularity/tree/v3.4.0): Version 3.4.0 of Singularity.
- - [v3.3.0](https://github.com/singularityhub/docker2singularity/tree/v3.3.0): Version 3.3.0 of Singularity.
- - [v3.2.1](https://github.com/singularityhub/docker2singularity/tree/v3.2.1): Version 3.2.1 of Singularity.
- - [v3.1](https://github.com/singularityhub/docker2singularity/tree/v3.1): Version 3.1 of Singularity.
- - [v2.6](https://github.com/singularityhub/docker2singularity/tree/v2.6): Version 2.6 of Singularity.
- - [v2.5](https://github.com/singularityhub/docker2singularity/tree/v2.5): Version 2.5.1 of Singularity. Same as 2.4 but with many bug fixes.
- - [v2.4](https://github.com/singularityhub/docker2singularity/tree/v2.4): Version 2.4 of Singularity. The default image format is squashfs.
- - [v2.3](https://github.com/singularityhub/docker2singularity/tree/v2.3): Version 2.3 of Singularity. The image format is ext3.
+If you want a legacy version, see the [repository branches](https://github.com/singularityhub/docker2singularity/branches)
+and [tag history](https://quay.io/repository/singularity/docker2singularity?tab=tags&tag=latest) on the registry.
 
 Containers were previous built on [Docker Hub](https://hub.docker.com/r/singularityware/docker2singularity/tags/) and
 now are provided on [quay.io](https://quay.io/repository/singularity/docker2singularity?tab=tags). A tag with prefix `v` corresponds to a release of the Singularity software, while the others are in reference to releases of Docker. Previously used [scripts](https://github.com/singularityhub/docker2singularity/tree/master/scripts), including environment and action files, are provided in this repository for reference.
