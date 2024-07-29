@@ -1,4 +1,4 @@
-FROM golang:1.21.3-alpine as base
+FROM golang:1.21.10-alpine AS base
 
 ################################################################################
 #
@@ -19,19 +19,19 @@ FROM golang:1.21.3-alpine as base
 #
 ################################################################################
 
-FROM docker:24.0.6-git as builder
+FROM docker:24.0.6-git AS builder
 COPY --from=base /go /go
 COPY --from=base /usr/local/go /usr/local/go
-ENV GOPATH /go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-ENV GOLANG_VERSION 1.21.3
+ENV GOPATH=/go
+ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
+ENV GOLANG_VERSION=1.21.10
 
 RUN apk update && \
     apk add --virtual .build-deps autoconf automake build-base linux-headers libffi-dev
 RUN apk add --no-cache bash git openssh-client-default gcc squashfs-tools sudo libtool gawk ca-certificates libseccomp libseccomp-dev
 RUN apk add --no-cache linux-headers build-base openssl-dev util-linux util-linux-dev shadow-uidmap fuse3-dev python3 rsync cryptsetup glib-dev
 
-ENV SINGULARITY_VERSION 4.1.0
+ENV SINGULARITY_VERSION=4.1.4
 RUN mkdir -p /usr/local/var/singularity/mnt && \
     mkdir -p $GOPATH/src/github.com/sylabs && \
     cd $GOPATH/src/github.com/sylabs && \
@@ -45,14 +45,14 @@ RUN mkdir -p /usr/local/var/singularity/mnt && \
 # See https://docs.docker.com/develop/develop-images/multistage-build/
 # for more information on multi-stage builds.
 
-FROM docker:18.09.8
-LABEL Maintainer @vsoch
+FROM docker:24.0.6-git
+LABEL Maintainer=@vsoch
 COPY --from=builder /usr/local/singularity /usr/local/singularity
-RUN apk add --no-cache ca-certificates libseccomp squashfs-tools bash python rsync
+RUN apk add --no-cache ca-certificates libseccomp libseccomp-dev squashfs-tools bash python3 rsync
 ENV PATH="/usr/local/singularity/bin:$PATH"
 
-ADD docker2singularity.sh /docker2singularity.sh
-ADD addLabel.py /addLabel.py
-ADD scripts /scripts
+COPY docker2singularity.sh /docker2singularity.sh
+COPY addLabel.py /addLabel.py
+COPY scripts /scripts
 RUN chmod a+x docker2singularity.sh
 ENTRYPOINT ["docker-entrypoint.sh", "/docker2singularity.sh"]
