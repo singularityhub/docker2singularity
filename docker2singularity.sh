@@ -12,7 +12,7 @@
 # USAGE: docker2singularity.sh ubuntu:14.04
 #
 #
-# Copyright (c) 2016-2019 Vanessa Sochat, All Rights Reserved
+# Copyright (c) 2016-2024 Vanessa Sochat, All Rights Reserved
 # Copyright (c) 2017 Singularityware LLC and AUTHORS
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -243,7 +243,7 @@ unset SINGULARITY_MESSAGELEVEL
 echo "(4/10) Adding run script..."
 
 function shell_escape () {
-    python -c 'import json, pipes, sys; print " ".join(pipes.quote(a) for a in json.load(sys.stdin) or [])'
+    python -c 'import json, pipes, sys; print(" ".join(pipes.quote(a) for a in json.load(sys.stdin) or []))'
 }
 
 CMD=$(docker inspect --format='{{json .Config.Cmd}}' $image | shell_escape)
